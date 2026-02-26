@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Menu Database</title>
+    <title>Uni Timetable Parser</title>
     <style>
         * {
             margin: 0;
@@ -13,377 +13,657 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a2a4a 0%, #2d3f6b 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            background: linear-gradient(135deg, #1a3a6b 0%, #2c5282 100%);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 36px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            right: 100px;
+            width: 140px;
+            height: 140px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
+            opacity: 0.8;
+            font-size: 1rem;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
         }
 
         .api-key-section {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e1e1e1;
+            padding: 16px 30px;
+            background: #f0f4f8;
+            border-bottom: 1px solid #dde3ec;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .api-key-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .api-key-label {
+            font-size: 0.82rem;
+            color: #4a5568;
+            font-weight: 500;
+            white-space: nowrap;
         }
 
         #apiKeyInput {
             flex: 1;
-            padding: 10px;
-            border: 2px solid #e1e1e1;
+            padding: 9px 14px;
+            border: 2px solid #cbd5e0;
             border-radius: 8px;
-            font-size: 0.9rem;
-            transition: border-color 0.3s ease;
+            font-size: 0.88rem;
+            background: white;
+            transition: border-color 0.2s;
         }
 
         #apiKeyInput:focus {
             outline: none;
-            border-color: #2ECC71;
+            border-color: #2c5282;
         }
 
         #saveApiKey {
-            padding: 10px 20px;
-            background: #2ECC71;
+            padding: 9px 20px;
+            background: #2c5282;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
+            font-size: 0.88rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background 0.2s;
         }
 
-        #saveApiKey:hover {
-            background: #27AE60;
-        }
+        #saveApiKey:hover { background: #1a3a6b; }
 
         .api-status {
-            margin-top: 10px;
             font-size: 0.8rem;
-            color: #666;
+            color: #718096;
+            white-space: nowrap;
         }
 
-        .api-status.success {
-            color: #2ECC71;
-        }
+        .api-status.success { color: #276749; }
 
         .content-section {
             padding: 30px;
         }
 
-        .schema-section {
-            background: #f8f9fa;
+        .input-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #2d3748;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 10px;
+        }
+
+        .examples-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .example-btn {
+            padding: 7px 14px;
+            background: #edf2ff;
+            color: #2c5282;
+            border: 1.5px solid #bee3f8;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .example-btn:hover {
+            background: #2c5282;
+            color: white;
+            border-color: #2c5282;
+        }
+
+        .timetable-input {
+            width: 100%;
+            min-height: 160px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .schema-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .schema-editor {
-            width: 100%;
-            min-height: 200px;
-            font-family: 'Courier New', monospace;
-            padding: 15px;
-            border: 2px solid #e1e1e1;
-            border-radius: 8px;
             font-size: 0.9rem;
+            line-height: 1.6;
             resize: vertical;
+            font-family: 'Segoe UI', sans-serif;
+            color: #2d3748;
+            transition: border-color 0.2s;
         }
 
-        .schema-editor:focus {
+        .timetable-input:focus {
             outline: none;
-            border-color: #2ECC71;
+            border-color: #2c5282;
         }
 
-        .input-section {
-            margin-bottom: 30px;
-        }
-
-        .input-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .menu-input {
+        .parse-btn {
             width: 100%;
-            min-height: 150px;
-            padding: 15px;
-            border: 2px solid #e1e1e1;
-            border-radius: 8px;
-            font-size: 1rem;
-            resize: vertical;
-        }
-
-        .menu-input:focus {
-            outline: none;
-            border-color: #2ECC71;
-        }
-
-        .generate-btn {
-            width: 100%;
-            padding: 15px;
-            background: #2ECC71;
+            padding: 14px;
+            background: linear-gradient(135deg, #1a3a6b 0%, #2c5282 100%);
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 30px;
+            margin: 18px 0;
+            transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.3px;
         }
 
-        .generate-btn:hover {
-            background: #27AE60;
+        .parse-btn:hover:not(:disabled) {
+            opacity: 0.92;
+            transform: translateY(-1px);
         }
 
-        .generate-btn:disabled {
-            background: #ccc;
+        .parse-btn:disabled {
+            background: #a0aec0;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .output-section {
+        /* Results */
+        .results-section {
+            display: none;
+        }
+
+        .results-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            padding: 10px 22px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #718096;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #1a3a6b;
+            border-bottom-color: #1a3a6b;
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: #2d3748;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Visual timetable */
+        .timetable-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
         }
 
-        .output-panel {
-            background: #f8f9fa;
+        .day-column {
+            background: #f7fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .day-header {
+            background: #1a3a6b;
+            color: white;
+            padding: 10px 16px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .day-classes {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .class-card {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 14px;
+            border-left: 4px solid #2c5282;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .class-card.lecture  { border-left-color: #2c5282; }
+        .class-card.tutorial { border-left-color: #276749; }
+        .class-card.lab      { border-left-color: #7b341e; }
+        .class-card.workshop { border-left-color: #744210; }
+        .class-card.seminar  { border-left-color: #553c9a; }
+
+        .class-unit-code {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #4a5568;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .class-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin: 2px 0 6px;
+            line-height: 1.3;
+        }
+
+        .class-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .meta-pill {
+            font-size: 0.72rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .pill-time     { background: #ebf4ff; color: #2b6cb0; }
+        .pill-type     { background: #f0fff4; color: #276749; }
+        .pill-location { background: #faf5ff; color: #553c9a; }
+        .pill-weeks    { background: #fffaf0; color: #744210; }
+
+        .class-card.lecture  .pill-type { background: #ebf4ff; color: #2c5282; }
+        .class-card.tutorial .pill-type { background: #f0fff4; color: #276749; }
+        .class-card.lab      .pill-type { background: #fff5f5; color: #9b2c2c; }
+        .class-card.workshop .pill-type { background: #fffbeb; color: #744210; }
+        .class-card.seminar  .pill-type { background: #faf5ff; color: #553c9a; }
+
+        .empty-day {
+            padding: 16px;
+            text-align: center;
+            color: #a0aec0;
+            font-size: 0.82rem;
+            font-style: italic;
+        }
+
+        /* JSON output */
+        .json-output {
+            background: #1a2a3a;
+            color: #a8d8ea;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 0.84rem;
+            padding: 20px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: #718096;
+        }
+
+        .loading-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #2c5282;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 14px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-state {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
             border-radius: 10px;
             padding: 20px;
-            min-height: 300px;
-        }
-
-        .panel-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #2ECC71;
-        }
-
-        .json-output {
-            font-family: 'Courier New', monospace;
+            color: #c53030;
             font-size: 0.9rem;
+        }
+
+        .semester-info {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-chip {
+            background: #ebf4ff;
+            border: 1px solid #bee3f8;
+            color: #2b6cb0;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .schema-info {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 20px;
+        }
+
+        .schema-info summary {
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4a5568;
+            user-select: none;
+        }
+
+        .schema-info pre {
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.78rem;
+            color: #4a5568;
+            line-height: 1.5;
             white-space: pre-wrap;
-            color: #333;
-            line-height: 1.4;
         }
 
-        .validation-status {
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .validation-status.valid {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .validation-status.invalid {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .loading {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            padding: 40px;
-        }
-
-        @media (max-width: 768px) {
-            .output-section {
-                grid-template-columns: 1fr;
+        @media (max-width: 600px) {
+            .api-key-section {
+                flex-wrap: wrap;
             }
-            
-            .api-key-group {
-                flex-direction: column;
-            }
-            
-            #saveApiKey {
-                width: 100%;
-            }
+            .header h1 { font-size: 1.6rem; }
+            .content-section { padding: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Restaurant Menu Database</h1>
-            <p>Convert menu descriptions into structured JSON data</p>
+            <div class="badge">Gemini API · Structured Output</div>
+            <h1>📅 Uni Timetable Parser</h1>
+            <p>Paste your semester unit descriptions and Gemini will parse them into a structured weekly timetable using JSON schema constraints.</p>
         </div>
-        
+
         <div class="api-key-section">
-            <div class="api-key-group">
-                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
-                <button id="saveApiKey">Save Key</button>
-            </div>
-            <div class="api-status" id="apiStatus">Enter your Google AI API key to start structuring data</div>
+            <span class="api-key-label">API Key</span>
+            <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+            <button id="saveApiKey">Save</button>
+            <span class="api-status" id="apiStatus">Enter your key to get started</span>
         </div>
-        
+
         <div class="content-section">
-            <div class="schema-section">
-                <div class="schema-title">JSON Schema Definition</div>
-                <textarea class="schema-editor" id="schemaEditor">{
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string",
-      "description": "Dish name"
-    },
-    "price": {
-      "type": "number",
-      "description": "Price in dollars"
-    },
-    "ingredients": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "List of main ingredients"
-    },
-    "allergens": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "List of allergens"
-    },
-    "dietary": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Dietary classifications"
-    },
-    "prep_time": {
-      "type": "string",
-      "description": "Preparation time"
-    },
-    "calories": {
-      "type": "number",
-      "description": "Calorie count"
-    },
-    "spice_level": {
-      "type": "string",
-      "description": "Spice level"
-    },
-    "serving_size": {
-      "type": "string",
-      "description": "Serving size"
-    }
-  },
-  "required": ["name", "price", "ingredients"]
-}</textarea>
+            <div class="input-label">Unit Descriptions</div>
+
+            <div class="examples-row">
+                <button class="example-btn" data-example="1">Example: ANU Science &amp; Law</button>
+                <button class="example-btn" data-example="2">Example: UQ Business &amp; Psych</button>
+                <button class="example-btn" data-example="3">Example: UNSW Engineering</button>
             </div>
-            
-            <div class="input-section">
-                <div class="input-title">Menu Item Description</div>
-                <textarea class="menu-input" id="menuInput" placeholder='Our signature pasta: "Sunset Spaghetti" - $18.50
-Fresh spaghetti with roasted cherry tomatoes, basil, and garlic.
-Contains gluten and garlic. Vegetarian friendly. 
-Preparation time: 15 minutes. Calories: 420.
-Spice level: Mild. Serving size: 300g.'>Our signature pasta: "Sunset Spaghetti" - $18.50
-Fresh spaghetti with roasted cherry tomatoes, basil, and garlic.
-Contains gluten and garlic. Vegetarian friendly. 
-Preparation time: 15 minutes. Calories: 420.
-Spice level: Mild. Serving size: 300g.</textarea>
-            </div>
-            
-            <button class="generate-btn" id="generateBtn">Generate Structured Data</button>
-            
-            <div class="output-section">
-                <div class="output-panel">
-                    <div class="panel-title">Generated JSON</div>
-                    <div id="jsonOutput" class="json-output">
-                        Click "Generate Structured Data" to see the JSON output...
-                    </div>
+
+            <textarea class="timetable-input" id="timetableInput" placeholder="Paste your timetable text here — e.g. copied from your student portal, handbook, or class guide...
+
+COMP1110 Software Construction
+  Lecture: Tuesday 10:00–12:00, CSIT Building Room N115, Weeks 1–12
+  Tutorial: Thursday 14:00–15:00, CSIT Building Room A101, Weeks 2–12"></textarea>
+
+            <button class="parse-btn" id="parseBtn" disabled>Parse My Timetable</button>
+
+            <div class="results-section" id="resultsSection">
+                <div class="results-tabs">
+                    <button class="tab-btn active" data-tab="visual">Visual Timetable</button>
+                    <button class="tab-btn" data-tab="json">Raw JSON</button>
                 </div>
-                
-                <div class="output-panel">
-                    <div class="panel-title">Validation & Preview</div>
-                    <div id="validationOutput">
-                        <div class="loading">JSON validation results will appear here...</div>
-                    </div>
+
+                <div id="tab-visual" class="tab-content active">
+                    <div class="semester-info" id="semesterInfo"></div>
+                    <div class="timetable-grid" id="timetableGrid"></div>
+                </div>
+
+                <div id="tab-json" class="tab-content">
+                    <div class="json-output" id="jsonOutput"></div>
                 </div>
             </div>
+
+            <details class="schema-info">
+                <summary>View JSON Schema used for structured output</summary>
+                <pre id="schemaDisplay"></pre>
+            </details>
         </div>
     </div>
 
     <script type="module">
-        // Import Google GenAI using ESM
         import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
 
+        // ── Example timetable texts ──────────────────────────────────────────────
+        const EXAMPLES = {
+            "1": `COMP1110 Software Construction
+  Lecture: Tuesday 10:00-12:00, CSIT Building Room N115, Weeks 1-12
+  Tutorial: Thursday 14:00-15:00, CSIT Building Room A101, Weeks 2-12
+  Lab: Friday 10:00-12:00, CSIT Building Room B112, Weeks 2-12
+
+LAWS1201 Foundations of Australian Law
+  Lecture: Monday 14:00-16:00, Law Building Moot Court, Weeks 1-12
+  Seminar: Wednesday 16:00-18:00, Law Building Room 163, Weeks 1-12
+
+BIOL1004 Biochemistry and Cell Biology
+  Lecture: Monday 9:00-10:00, Robertson Building Lecture Theatre, Weeks 1-13
+  Lecture: Wednesday 9:00-10:00, Robertson Building Lecture Theatre, Weeks 1-13
+  Tutorial: Friday 13:00-14:00, Linnaeus Building Room 2.05, Weeks 2-12
+  Lab: Thursday 14:00-17:00, John Curtin School of Medical Research Level 1, Odd weeks 3-11`,
+
+            "2": `MKTG1001 Marketing Principles
+  Lecture: Monday 10:00am-12:00pm, Sir Llew Edwards Building 14-212, Weeks 1-13
+  Tutorial: Wednesday 2:00pm-3:00pm, Chamberlain Building 35-212, Weeks 1-13
+
+PSYC1030 Behavioural Neuroscience
+  Lecture: Tuesday 9:00am-11:00am, Prentice Building 42-201, Weeks 1-13
+  Tutorial: Thursday 1:00pm-2:00pm, Biological Sciences Library, Weeks 2-13
+  Lab: Friday 2:00pm-5:00pm, Goddard Building 8-316, Even weeks 2-12
+
+ACCT1101 Accounting for Decision Making
+  Lecture: Wednesday 10:00am-11:00am, General Purpose South 78-420, Weeks 1-13
+  Lecture: Friday 10:00am-11:00am, General Purpose South 78-420, Weeks 1-13
+  Tutorial: Monday 3:00pm-4:00pm, Colin Clark Building 39-227, Weeks 1-13`,
+
+            "3": `ELEC1111 Electrical and Telecommunications Engineering
+  Lecture: Monday 9:00-11:00, Electrical Engineering Building Room G03, Weeks 1-10
+  Lecture: Wednesday 9:00-10:00, Electrical Engineering Building Room G03, Weeks 1-10
+  Tutorial: Tuesday 14:00-16:00, Tyree Energy Technologies Building Room 422, Weeks 1-10
+  Lab: Thursday 14:00-17:00, Electrical Engineering Building Lab 105, Weeks 2-10 (fortnightly)
+
+MATH1131 Mathematics 1A
+  Lecture: Tuesday 12:00-13:00, Central Lecture Block Room 7, Weeks 1-10
+  Lecture: Thursday 12:00-13:00, Central Lecture Block Room 7, Weeks 1-10
+  Tutorial: Friday 11:00-12:00, Red Centre Room 4082, Weeks 1-10
+  
+DESN1000 Engineering Design
+  Workshop: Monday 13:00-17:00, Ainsworth Building Room 201, Weeks 1, 3, 5, 7, 9
+  Lecture: Wednesday 12:00-14:00, Colombo Theatre A, Weeks 1-10`
+        };
+
+        // ── JSON Schema for the structured output ────────────────────────────────
+        const RESPONSE_SCHEMA = {
+            type: Type.OBJECT,
+            properties: {
+                semester: {
+                    type: Type.STRING,
+                    description: "Semester identifier inferred from context (e.g. 'Semester 1 2025') or 'Unknown' if not mentioned"
+                },
+                university: {
+                    type: Type.STRING,
+                    description: "University name if identifiable from context, otherwise 'Unknown'"
+                },
+                classes: {
+                    type: Type.ARRAY,
+                    description: "All individual class sessions parsed from the input",
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            unit_code: {
+                                type: Type.STRING,
+                                description: "Unit/subject code e.g. COMP1110"
+                            },
+                            unit_name: {
+                                type: Type.STRING,
+                                description: "Full unit/subject name e.g. Software Construction"
+                            },
+                            class_type: {
+                                type: Type.STRING,
+                                description: "Type of session: lecture, tutorial, lab, workshop, seminar, or other"
+                            },
+                            day: {
+                                type: Type.STRING,
+                                description: "Day of week e.g. Monday"
+                            },
+                            start_time: {
+                                type: Type.STRING,
+                                description: "Start time in 24h format e.g. 10:00"
+                            },
+                            end_time: {
+                                type: Type.STRING,
+                                description: "End time in 24h format e.g. 12:00"
+                            },
+                            location: {
+                                type: Type.STRING,
+                                description: "Building and room number/name"
+                            },
+                            week_pattern: {
+                                type: Type.STRING,
+                                description: "Which weeks this class runs e.g. Weeks 1-13, Odd weeks 3-11, Weeks 1-10 (fortnightly)"
+                            }
+                        },
+                        required: ["unit_code", "unit_name", "class_type", "day", "start_time", "end_time", "location", "week_pattern"]
+                    }
+                }
+            },
+            required: ["semester", "university", "classes"]
+        };
+
+        // Display schema in details panel
+        const schemaForDisplay = {
+            type: "object",
+            properties: {
+                semester: { type: "string" },
+                university: { type: "string" },
+                classes: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            unit_code:    { type: "string" },
+                            unit_name:    { type: "string" },
+                            class_type:   { type: "string", enum: ["lecture","tutorial","lab","workshop","seminar","other"] },
+                            day:          { type: "string" },
+                            start_time:   { type: "string", description: "24h format" },
+                            end_time:     { type: "string", description: "24h format" },
+                            location:     { type: "string" },
+                            week_pattern: { type: "string" }
+                        },
+                        required: ["unit_code","unit_name","class_type","day","start_time","end_time","location","week_pattern"]
+                    }
+                }
+            },
+            required: ["semester", "university", "classes"]
+        };
+        document.getElementById('schemaDisplay').textContent = JSON.stringify(schemaForDisplay, null, 2);
+
+        // ── State ────────────────────────────────────────────────────────────────
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
 
-        // Initialize elements
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const apiStatus = document.getElementById('apiStatus');
-        const schemaEditor = document.getElementById('schemaEditor');
-        const menuInput = document.getElementById('menuInput');
-        const generateBtn = document.getElementById('generateBtn');
-        const jsonOutput = document.getElementById('jsonOutput');
-        const validationOutput = document.getElementById('validationOutput');
+        const apiKeyInput    = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn  = document.getElementById('saveApiKey');
+        const apiStatus      = document.getElementById('apiStatus');
+        const timetableInput = document.getElementById('timetableInput');
+        const parseBtn       = document.getElementById('parseBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const semesterInfo   = document.getElementById('semesterInfo');
+        const timetableGrid  = document.getElementById('timetableGrid');
+        const jsonOutput     = document.getElementById('jsonOutput');
 
-        // Load saved API key
         if (apiKey) {
             apiKeyInput.value = apiKey;
-            initializeAI();
+            initAI();
         }
 
-        function initializeAI() {
+        function initAI() {
             try {
-                ai = new GoogleGenAI({ apiKey: apiKey });
-                apiStatus.textContent = '✅ API key saved and ready!';
+                ai = new GoogleGenAI({ apiKey });
+                apiStatus.textContent = '✅ Ready';
                 apiStatus.className = 'api-status success';
-                generateBtn.disabled = false;
-            } catch (error) {
-                apiStatus.textContent = '❌ Invalid API key';
+                parseBtn.disabled = false;
+            } catch {
+                apiStatus.textContent = '❌ Invalid key';
                 apiStatus.className = 'api-status';
-                generateBtn.disabled = true;
+                parseBtn.disabled = true;
             }
         }
 
@@ -391,184 +671,182 @@ Spice level: Mild. Serving size: 300g.</textarea>
             apiKey = apiKeyInput.value.trim();
             if (apiKey) {
                 localStorage.setItem('googleAiApiKey', apiKey);
-                initializeAI();
-            } else {
-                apiStatus.textContent = 'Please enter a valid API key';
-                apiStatus.className = 'api-status';
+                initAI();
             }
         });
 
-        // Generate structured data
-        generateBtn.addEventListener('click', async () => {
-            if (!ai) {
-                alert('Please enter your Google AI API key first');
-                return;
-            }
+        // ── Example buttons ──────────────────────────────────────────────────────
+        document.querySelectorAll('.example-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                timetableInput.value = EXAMPLES[btn.dataset.example];
+            });
+        });
 
-            const menuText = menuInput.value.trim();
-            const schema = schemaEditor.value.trim();
+        // ── Tab switching ────────────────────────────────────────────────────────
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
 
-            if (!menuText) {
-                alert('Please enter a menu item description');
-                return;
-            }
+        // ── Parse ────────────────────────────────────────────────────────────────
+        parseBtn.addEventListener('click', async () => {
+            if (!ai) { alert('Please enter your Google AI API key first.'); return; }
+            const text = timetableInput.value.trim();
+            if (!text) { alert('Please paste your timetable text first.'); return; }
 
-            if (!schema) {
-                alert('Please define a JSON schema');
-                return;
-            }
-
-            generateBtn.disabled = true;
-            jsonOutput.innerHTML = '<div class="loading">📊 Converting to structured data...</div>';
-            validationOutput.innerHTML = '<div class="loading">Validating JSON structure...</div>';
+            parseBtn.disabled = true;
+            parseBtn.textContent = 'Parsing…';
+            resultsSection.style.display = 'block';
+            timetableGrid.innerHTML = `<div class="loading-state" style="grid-column:1/-1">
+                <div class="loading-spinner"></div>
+                <div>Gemini is structuring your timetable…</div>
+            </div>`;
+            jsonOutput.textContent = '';
+            semesterInfo.innerHTML = '';
 
             try {
-                // Parse schema to get the structure
-                const parsedSchema = JSON.parse(schema);
-
                 const response = await ai.models.generateContent({
                     model: "gemini-2.5-flash",
                     contents: [{
-                        text: `Convert this menu description into JSON format following the provided schema:\n\nMenu description: ${menuText}\n\nSchema: ${schema}\n\nReturn only valid JSON that matches the schema.`
+                        text: `You are a university timetable parser for Australian universities. Extract all class sessions from the following timetable text and return structured JSON.
+
+Convert all times to 24-hour format (e.g. 2:00pm → 14:00).
+Use Australian university terminology: units (not courses), tutorials (not recitations), practicals/labs, workshops, seminars.
+Identify the class type as one of: lecture, tutorial, lab, workshop, seminar, or other.
+If multiple instances of the same class repeat on different days or times, create a separate entry for each.
+
+Timetable text:
+${text}`
                     }],
                     generationConfig: {
                         responseMimeType: "application/json",
-                        responseSchema: convertToGeminiSchema(parsedSchema)
-                    },
+                        responseSchema: RESPONSE_SCHEMA
+                    }
                 });
 
-                // Extract JSON from markdown code blocks if present
-                let jsonText = response.text;
-                if (jsonText.includes('```json')) {
-                    const jsonMatch = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
-                    if (jsonMatch) {
-                        jsonText = jsonMatch[1];
-                    }
-                } else if (jsonText.includes('```')) {
-                    const jsonMatch = jsonText.match(/```\s*([\s\S]*?)\s*```/);
-                    if (jsonMatch) {
-                        jsonText = jsonMatch[1];
-                    }
-                }
-
-                const jsonData = JSON.parse(jsonText.trim());
-                
-                // Display formatted JSON
-                jsonOutput.textContent = JSON.stringify(jsonData, null, 2);
-
-                // Validate and display results
-                validateAndDisplayResults(jsonData, parsedSchema);
+                const data = JSON.parse(response.text);
+                renderResults(data);
+                jsonOutput.textContent = JSON.stringify(data, null, 2);
 
             } catch (error) {
-                console.error('Error generating structured data:', error);
-                jsonOutput.innerHTML = '<div class="loading">❌ Error generating structured data. Please check your schema and try again.</div>';
-                validationOutput.innerHTML = '<div class="validation-status invalid">❌ Generation failed</div>';
+                console.error(error);
+                timetableGrid.innerHTML = `<div class="error-state" style="grid-column:1/-1">
+                    ❌ <strong>Parse failed.</strong> ${error.message || 'Check your API key and try again.'}
+                </div>`;
             }
 
-            generateBtn.disabled = false;
+            parseBtn.disabled = false;
+            parseBtn.textContent = 'Parse My Timetable';
         });
 
-        function convertToGeminiSchema(jsonSchema) {
-            // Convert JSON Schema to Gemini schema format
-            const convertType = (prop) => {
-                switch (prop.type) {
-                    case 'string': return Type.STRING;
-                    case 'number': return Type.NUMBER;
-                    case 'integer': return Type.INTEGER;
-                    case 'array': return Type.ARRAY;
-                    case 'object': return Type.OBJECT;
-                    default: return Type.STRING;
-                }
-            };
+        // ── Render visual timetable ──────────────────────────────────────────────
+        const DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-            const properties = {};
-            for (const [key, prop] of Object.entries(jsonSchema.properties)) {
-                if (prop.type === 'array') {
-                    properties[key] = {
-                        type: Type.ARRAY,
-                        items: { type: convertType(prop.items) }
-                    };
-                } else {
-                    properties[key] = {
-                        type: convertType(prop)
-                    };
-                }
+        function renderResults(data) {
+            // Semester info chips
+            semesterInfo.innerHTML = '';
+            if (data.semester && data.semester !== 'Unknown') {
+                semesterInfo.innerHTML += `<span class="info-chip">📆 ${data.semester}</span>`;
+            }
+            if (data.university && data.university !== 'Unknown') {
+                semesterInfo.innerHTML += `<span class="info-chip">🎓 ${data.university}</span>`;
+            }
+            if (data.classes) {
+                semesterInfo.innerHTML += `<span class="info-chip">${data.classes.length} class session${data.classes.length !== 1 ? 's' : ''}</span>`;
             }
 
-            return {
-                type: Type.OBJECT,
-                properties: properties,
-                required: jsonSchema.required || []
-            };
-        }
+            if (!data.classes || data.classes.length === 0) {
+                timetableGrid.innerHTML = '<div style="grid-column:1/-1;color:#718096;padding:20px">No classes found in the input.</div>';
+                return;
+            }
 
-        function validateAndDisplayResults(data, schema) {
-            const validation = validateJSON(data, schema);
-            
-            let html = '';
-            
-            if (validation.isValid) {
-                html += '<div class="validation-status valid">✅ JSON is valid and matches schema!</div>';
-            } else {
-                html += '<div class="validation-status invalid">❌ JSON validation failed</div>';
-                html += '<div style="margin-top: 10px; font-size: 0.9rem;">';
-                validation.errors.forEach(error => {
-                    html += `<div style="color: #721c24; margin: 5px 0;">• ${error}</div>`;
+            // Group by day
+            const byDay = {};
+            for (const cls of data.classes) {
+                const day = cls.day || 'Unknown';
+                if (!byDay[day]) byDay[day] = [];
+                byDay[day].push(cls);
+            }
+
+            // Sort each day's classes by start time
+            for (const day of Object.keys(byDay)) {
+                byDay[day].sort((a, b) => {
+                    const toMins = t => {
+                        const [h, m] = (t || '0:00').split(':').map(Number);
+                        return h * 60 + (m || 0);
+                    };
+                    return toMins(a.start_time) - toMins(b.start_time);
                 });
-                html += '</div>';
             }
 
-            // Add preview
-            html += '<div style="margin-top: 20px;"><strong>Data Preview:</strong></div>';
-            html += '<div style="background: white; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem;">';
-            
-            for (const [key, value] of Object.entries(data)) {
-                html += `<div style="margin: 5px 0;"><strong>${key}:</strong> `;
-                if (Array.isArray(value)) {
-                    html += value.join(', ');
-                } else {
-                    html += value;
+            // Render columns in day order
+            const daysPresent = DAY_ORDER.filter(d => byDay[d]);
+            const extraDays = Object.keys(byDay).filter(d => !DAY_ORDER.includes(d));
+            const allDays = [...daysPresent, ...extraDays];
+
+            timetableGrid.innerHTML = '';
+
+            for (const day of allDays) {
+                const col = document.createElement('div');
+                col.className = 'day-column';
+
+                const header = document.createElement('div');
+                header.className = 'day-header';
+                header.textContent = day;
+                col.appendChild(header);
+
+                const classes = document.createElement('div');
+                classes.className = 'day-classes';
+
+                for (const cls of byDay[day]) {
+                    classes.appendChild(buildClassCard(cls));
                 }
-                html += '</div>';
-            }
-            
-            html += '</div>';
 
-            validationOutput.innerHTML = html;
+                col.appendChild(classes);
+                timetableGrid.appendChild(col);
+            }
         }
 
-        function validateJSON(data, schema) {
-            const errors = [];
-            let isValid = true;
+        function buildClassCard(cls) {
+            const card = document.createElement('div');
+            const type = (cls.class_type || 'other').toLowerCase();
+            card.className = `class-card ${type}`;
 
-            // Check required fields
-            if (schema.required) {
-                for (const field of schema.required) {
-                    if (!(field in data)) {
-                        errors.push(`Missing required field: ${field}`);
-                        isValid = false;
-                    }
-                }
-            }
+            const timeStr = cls.start_time && cls.end_time
+                ? `${formatTime(cls.start_time)} – ${formatTime(cls.end_time)}`
+                : '';
 
-            // Check field types
-            for (const [key, value] of Object.entries(data)) {
-                if (schema.properties[key]) {
-                    const expectedType = schema.properties[key].type;
-                    const actualType = Array.isArray(value) ? 'array' : typeof value;
-                    
-                    if (expectedType !== actualType) {
-                        errors.push(`Field '${key}' should be ${expectedType}, got ${actualType}`);
-                        isValid = false;
-                    }
-                }
-            }
+            card.innerHTML = `
+                <div class="class-unit-code">${escHtml(cls.unit_code || '')}</div>
+                <div class="class-name">${escHtml(cls.unit_name || '')}</div>
+                <div class="class-meta">
+                    ${timeStr ? `<span class="meta-pill pill-time">🕐 ${escHtml(timeStr)}</span>` : ''}
+                    <span class="meta-pill pill-type">${capitalise(type)}</span>
+                    ${cls.location ? `<span class="meta-pill pill-location">📍 ${escHtml(cls.location)}</span>` : ''}
+                    ${cls.week_pattern ? `<span class="meta-pill pill-weeks">📅 ${escHtml(cls.week_pattern)}</span>` : ''}
+                </div>`;
 
-            return { isValid, errors };
+            return card;
         }
 
-        // Initialize
-        generateBtn.disabled = !apiKey;
+        function formatTime(t) {
+            if (!t) return '';
+            const [h, m] = t.split(':').map(Number);
+            const period = h < 12 ? 'am' : 'pm';
+            const hour = h % 12 || 12;
+            return m ? `${hour}:${String(m).padStart(2,'0')}${period}` : `${hour}${period}`;
+        }
+
+        function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+        function escHtml(s) {
+            return String(s)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
     </script>
 </body>
 </html>

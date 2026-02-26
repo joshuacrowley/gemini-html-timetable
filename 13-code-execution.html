@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Scaler Calculator</title>
+    <title>WAM & Study Load Calculator</title>
     <style>
         * {
             margin: 0;
@@ -13,174 +13,223 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #74B9FF 0%, #0984E3 100%);
+            background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
             color: white;
-            padding: 30px;
+            padding: 35px 30px;
             text-align: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e94560, #f5a623, #0f3460);
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
+            opacity: 0.85;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .api-key-section {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e1e1e1;
+            padding: 18px 30px;
+            background: #f7f8fc;
+            border-bottom: 1px solid #e8eaf0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .api-key-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .api-key-section label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #444;
+            white-space: nowrap;
         }
 
         #apiKeyInput {
             flex: 1;
-            padding: 10px;
-            border: 2px solid #e1e1e1;
+            min-width: 200px;
+            padding: 9px 14px;
+            border: 2px solid #e0e3ed;
             border-radius: 8px;
             font-size: 0.9rem;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.2s;
         }
 
         #apiKeyInput:focus {
             outline: none;
-            border-color: #74B9FF;
+            border-color: #533483;
         }
 
         #saveApiKey {
-            padding: 10px 20px;
-            background: #74B9FF;
+            padding: 9px 20px;
+            background: #533483;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
         }
 
-        #saveApiKey:hover {
-            background: #0984E3;
-        }
+        #saveApiKey:hover { background: #0f3460; }
 
         .api-status {
-            margin-top: 10px;
             font-size: 0.8rem;
-            color: #666;
+            color: #888;
+            width: 100%;
         }
 
-        .api-status.success {
-            color: #74B9FF;
-        }
+        .api-status.success { color: #27ae60; font-weight: 500; }
+        .api-status.error { color: #e74c3c; }
 
         .content-section {
-            padding: 30px;
+            padding: 28px 30px;
         }
 
-        .problem-section {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
+        /* Examples */
+        .examples-section {
+            margin-bottom: 24px;
         }
 
-        .problem-title {
-            font-weight: 500;
-            color: #856404;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #888;
+            margin-bottom: 10px;
         }
 
-        .problem-text {
-            font-family: 'Georgia', serif;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            white-space: pre-wrap;
-            line-height: 1.6;
-            border: 1px solid #e1e1e1;
-        }
-
-        .code-settings {
+        .examples-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .setting-group {
-            display: flex;
-            flex-direction: column;
             gap: 8px;
         }
 
-        .setting-group label {
-            font-weight: 500;
+        .example-chip {
+            background: #f7f8fc;
+            border: 1.5px solid #e0e3ed;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.82rem;
             color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            line-height: 1.4;
         }
 
-        .setting-group select,
-        .setting-group input {
-            padding: 12px;
-            border: 2px solid #e1e1e1;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
+        .example-chip:hover {
+            border-color: #533483;
+            background: #f0edf8;
+            color: #533483;
         }
 
-        .setting-group select:focus,
-        .setting-group input:focus {
-            outline: none;
-            border-color: #74B9FF;
+        .example-chip:last-child {
+            grid-column: 1 / -1;
         }
 
-        .execute-btn {
+        /* Query input */
+        .query-area {
+            margin-bottom: 16px;
+        }
+
+        .query-textarea {
             width: 100%;
-            padding: 15px;
-            background: #74B9FF;
+            min-height: 100px;
+            padding: 14px 16px;
+            border: 2px solid #e0e3ed;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.2s;
+            color: #222;
+        }
+
+        .query-textarea:focus {
+            outline: none;
+            border-color: #533483;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #e94560, #c0392b);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 500;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 30px;
+            transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.3px;
+            margin-bottom: 26px;
         }
 
-        .execute-btn:hover {
-            background: #0984E3;
+        .calculate-btn:hover:not(:disabled) {
+            opacity: 0.92;
+            transform: translateY(-1px);
         }
 
-        .execute-btn:disabled {
+        .calculate-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
+            transform: none;
         }
 
+        /* Output panels */
         .output-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -188,239 +237,335 @@
         }
 
         .output-panel {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            min-height: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1.5px solid #e0e3ed;
         }
 
-        .panel-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #74B9FF;
-        }
-
-        .code-editor {
-            background: #2d3748;
-            color: #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            overflow-x: auto;
-            min-height: 400px;
-            border: 1px solid #4a5568;
-        }
-
-        .execution-results {
-            background: white;
-            border: 1px solid #e1e1e1;
-            border-radius: 8px;
-            padding: 20px;
-            min-height: 400px;
-        }
-
-        .result-section {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .result-section:last-child {
-            border-bottom: none;
-        }
-
-        .result-title {
-            font-weight: 500;
-            color: #74B9FF;
-            margin-bottom: 10px;
+        .panel-header {
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .result-content {
-            font-family: 'Courier New', monospace;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid #e1e1e1;
+        .panel-header.code-header {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border-bottom: 1px solid #313244;
+        }
+
+        .panel-header.result-header {
+            background: #f0fdf4;
+            color: #166534;
+            border-bottom: 1.5px solid #bbf7d0;
+        }
+
+        .panel-header.explanation-header {
+            background: #eff6ff;
+            color: #1e40af;
+            border-bottom: 1.5px solid #bfdbfe;
+        }
+
+        /* Code block */
+        .code-block {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            padding: 18px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.82rem;
+            line-height: 1.65;
             white-space: pre-wrap;
+            overflow-x: auto;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
         }
 
-        .test-results {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
+        /* Execution output */
+        .exec-output {
+            background: #fafffe;
+            padding: 18px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            color: #064e3b;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
         }
 
-        .test-case {
-            background: #f8f9fa;
-            border: 1px solid #e1e1e1;
-            border-radius: 6px;
-            padding: 12px;
+        /* Explanation */
+        .explanation-panel {
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1.5px solid #bfdbfe;
         }
 
-        .test-case.success {
-            border-color: #28a745;
-            background: #d4edda;
+        .explanation-body {
+            background: white;
+            padding: 18px 20px;
+            font-size: 0.92rem;
+            line-height: 1.7;
+            color: #1e293b;
         }
 
-        .test-case.error {
-            border-color: #dc3545;
-            background: #f8d7da;
+        /* Status row */
+        .status-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
         }
 
-        .test-label {
-            font-weight: 500;
-            margin-bottom: 5px;
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
 
-        .test-value {
-            font-family: 'Courier New', monospace;
+        .status-chip.ok {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-chip.warn {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-chip.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Placeholder */
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #aaa;
+            font-size: 0.9rem;
+            gap: 10px;
+        }
+
+        .placeholder-icon {
+            font-size: 2.5rem;
+            opacity: 0.4;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid #e0e3ed;
+            border-top-color: #533483;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            color: #666;
             font-size: 0.9rem;
         }
 
-        .loading {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            padding: 40px;
+        /* Grade table hint */
+        .grade-ref {
+            margin-bottom: 20px;
+            background: #fefce8;
+            border: 1.5px solid #fde68a;
+            border-radius: 10px;
+            padding: 12px 16px;
         }
 
-        @media (max-width: 768px) {
-            .code-settings {
-                grid-template-columns: 1fr;
-            }
-            
-            .output-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .api-key-group {
-                flex-direction: column;
-            }
-            
-            #saveApiKey {
-                width: 100%;
-            }
+        .grade-ref-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
 
-            .test-results {
-                grid-template-columns: 1fr;
-            }
+        .grade-table {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .grade-item {
+            background: white;
+            border: 1px solid #fde68a;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.78rem;
+            color: #78350f;
+            font-weight: 600;
+        }
+
+        @media (max-width: 700px) {
+            .output-section { grid-template-columns: 1fr; }
+            .examples-grid { grid-template-columns: 1fr; }
+            .example-chip:last-child { grid-column: auto; }
+            .header h1 { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>💻 Recipe Scaler Calculator</h1>
-            <p>Create and execute code to scale recipe ingredients</p>
+            <h1>📐 WAM & Study Load Calculator</h1>
+            <p>Describe your semester — Gemini writes and runs the Python for you</p>
+            <div class="badge-row">
+                <span class="badge">WAM / GPA</span>
+                <span class="badge">Credit Points</span>
+                <span class="badge">HD · D · C · P · F</span>
+                <span class="badge">Swotvac Planner</span>
+                <span class="badge">Code Execution</span>
+            </div>
         </div>
-        
+
         <div class="api-key-section">
-            <div class="api-key-group">
-                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
-                <button id="saveApiKey">Save Key</button>
-            </div>
-            <div class="api-status" id="apiStatus">Enter your Google AI API key to start coding</div>
+            <label for="apiKeyInput">Google AI API Key</label>
+            <input type="password" id="apiKeyInput" placeholder="AIza..." maxlength="200">
+            <button id="saveApiKey">Save Key</button>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to get started</div>
         </div>
-        
+
         <div class="content-section">
-            <div class="problem-section">
-                <div class="problem-title">🧮 Recipe Scaling Problem</div>
-                <div class="problem-text" id="problemText">Original recipe serves 4:
-- 200g flour
-- 300ml milk  
-- 2 eggs
-- 15ml vanilla
-- 5g salt
 
-Create a function that scales this recipe for any number of servings.
-Test it for 7 servings.</div>
-            </div>
-
-            <div class="code-settings">
-                <div class="setting-group">
-                    <label for="languageSelect">Code Generation Language</label>
-                    <select id="languageSelect">
-                        <option value="python">Python (Executable)</option>
-                        <option value="javascript">JavaScript (Code Only)</option>
-                        <option value="java">Java (Code Only)</option>
-                        <option value="cpp">C++ (Code Only)</option>
-                    </select>
-                    <small style="color: #666; font-size: 0.8rem; margin-top: 4px;">Note: Only Python code can be executed by Gemini</small>
-                </div>
-                
-                <div class="setting-group">
-                    <label for="targetServings">Test Servings</label>
-                    <input type="number" id="targetServings" value="7" min="1" max="100">
+            <div class="grade-ref">
+                <div class="grade-ref-title">Australian Grade Scale Reference</div>
+                <div class="grade-table">
+                    <span class="grade-item">HD ≥ 85</span>
+                    <span class="grade-item">D 75–84</span>
+                    <span class="grade-item">C 65–74</span>
+                    <span class="grade-item">P 50–64</span>
+                    <span class="grade-item">F &lt; 50</span>
+                    <span class="grade-item">GPA 7-pt scale</span>
+                    <span class="grade-item">WAM = weighted avg mark</span>
                 </div>
             </div>
-            
-            <button class="execute-btn" id="executeBtn">Generate & Execute Code</button>
-            
+
+            <div class="examples-section">
+                <div class="section-label">Example Queries — click to load</div>
+                <div class="examples-grid">
+                    <button class="example-chip" data-query="I have 4 units at 6 credit points each. I'm averaging 72 (Credit). What WAM do I need in the remaining assessments to hit 75 (Distinction)?">
+                        📊 I have 4 units at 6 CP each, averaging 72. What WAM do I need in remaining assessments to hit 75?
+                    </button>
+                    <button class="example-chip" data-query="My COMP1010 has: Assignment 1 (20%, I got 16/20), Mid-sem test (30%, I got 24/30), Final exam (50%, not yet done). What do I need in the final to pass? To get a D? An HD?">
+                        🎯 COMP1010: Assign 1 20% got 16, Mid-sem 30% got 24, Final 50% remaining. What do I need to pass / get D / HD?
+                    </button>
+                    <button class="example-chip" data-query="I have 18 contact hours per week. The recommended study is 2 hours per hour of class. I also work 16 hours per week. How many free hours do I have left for study and leisure each week? Assume 112 waking hours per week.">
+                        ⏰ 18 contact hours/wk, recommended 2hr study per class hour, work 16hr/wk. How many free hours remain?
+                    </button>
+                    <button class="example-chip" data-query="Generate a swotvac study hours plan for 5 days with 4 exams. Weight study time by unit difficulty: MATH (hardest, weight 4), COMP (weight 3), PSYC (weight 2), HIST (easiest, weight 1). Total 8 hours of study per day.">
+                        📅 Swotvac 5 days, 4 exams (MATH hardest, HIST easiest). Allocate 8 hrs/day weighted by difficulty.
+                    </button>
+                    <button class="example-chip" data-query="Calculate my GPA on the 7-point Australian scale given these unit marks: 82 (6 CP), 67 (6 CP), 71 (6 CP), 55 (6 CP). Show each grade band, the GPA points for each, and the final weighted GPA.">
+                        🏆 Calculate my 7-point GPA for marks: 82, 67, 71, 55 (all 6 CP). Show grade bands and final GPA.
+                    </button>
+                </div>
+            </div>
+
+            <div class="query-area">
+                <div class="section-label">Your Query</div>
+                <textarea class="query-textarea" id="queryInput" placeholder="Describe your units, marks, credit points, or study situation. E.g. 'I have 3 units: COMP1010 (6CP, 68 so far), MATH1001 (6CP, 55 so far), PSYC1002 (3CP, 80 so far). Calculate my WAM and what I need to lift it above 70.'"></textarea>
+            </div>
+
+            <button class="calculate-btn" id="calculateBtn" disabled>
+                ▶ Generate &amp; Run Python — Calculate
+            </button>
+
             <div class="output-section">
-                <div class="output-panel">
-                    <div class="panel-title">📝 Generated Code</div>
-                    <div class="code-editor" id="codeEditor">
-# Your generated code will appear here...
-
-def scale_recipe(servings):
-    # Recipe scaling logic will be generated
-    pass
+                <div class="output-panel" id="codePanel">
+                    <div class="panel-header code-header">
+                        <span>⚙</span> Generated Python Code
+                    </div>
+                    <div class="code-block" id="codeOutput">
+                        <div class="placeholder">
+                            <span class="placeholder-icon">🐍</span>
+                            Generated Python code will appear here
+                        </div>
                     </div>
                 </div>
-                
-                <div class="output-panel">
-                    <div class="panel-title">▶️ Execution Results</div>
-                    <div class="execution-results" id="executionResults">
-                        <div class="loading">Click "Generate & Execute Code" to see results...</div>
+
+                <div class="output-panel" id="resultPanel">
+                    <div class="panel-header result-header">
+                        <span>✅</span> Execution Output
+                    </div>
+                    <div class="exec-output" id="execOutput">
+                        <div class="placeholder">
+                            <span class="placeholder-icon">📋</span>
+                            Calculation results will appear here
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div class="explanation-panel" id="explanationPanel" style="display:none;">
+                <div class="panel-header explanation-header">
+                    <span>💬</span> Gemini's Explanation
+                </div>
+                <div class="explanation-body" id="explanationOutput"></div>
+            </div>
+
+            <div class="status-row" id="statusRow" style="display:none;"></div>
         </div>
     </div>
 
     <script type="module">
-        // Import Google GenAI using ESM
         import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
 
-        // Initialize elements
-        const apiKeyInput = document.getElementById('apiKeyInput');
+        const apiKeyInput   = document.getElementById('apiKeyInput');
         const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const apiStatus = document.getElementById('apiStatus');
-        const problemText = document.getElementById('problemText');
-        const languageSelect = document.getElementById('languageSelect');
-        const targetServings = document.getElementById('targetServings');
-        const executeBtn = document.getElementById('executeBtn');
-        const codeEditor = document.getElementById('codeEditor');
-        const executionResults = document.getElementById('executionResults');
+        const apiStatus     = document.getElementById('apiStatus');
+        const queryInput    = document.getElementById('queryInput');
+        const calculateBtn  = document.getElementById('calculateBtn');
+        const codeOutput    = document.getElementById('codeOutput');
+        const execOutput    = document.getElementById('execOutput');
+        const explanationPanel = document.getElementById('explanationPanel');
+        const explanationOutput = document.getElementById('explanationOutput');
+        const statusRow     = document.getElementById('statusRow');
 
-        // Load saved API key
         if (apiKey) {
             apiKeyInput.value = apiKey;
-            initializeAI();
+            initAI();
         }
 
-        function initializeAI() {
+        function initAI() {
             try {
-                ai = new GoogleGenAI({ apiKey: apiKey });
-                apiStatus.textContent = '✅ API key saved and ready!';
+                ai = new GoogleGenAI({ apiKey });
+                apiStatus.textContent = '✅ API key saved — ready to calculate';
                 apiStatus.className = 'api-status success';
-                executeBtn.disabled = false;
-            } catch (error) {
-                apiStatus.textContent = '❌ Invalid API key';
-                apiStatus.className = 'api-status';
-                executeBtn.disabled = true;
+                calculateBtn.disabled = false;
+            } catch {
+                apiStatus.textContent = '❌ Could not initialise with that API key';
+                apiStatus.className = 'api-status error';
+                calculateBtn.disabled = true;
             }
         }
 
@@ -428,138 +573,126 @@ def scale_recipe(servings):
             apiKey = apiKeyInput.value.trim();
             if (apiKey) {
                 localStorage.setItem('googleAiApiKey', apiKey);
-                initializeAI();
+                initAI();
             } else {
                 apiStatus.textContent = 'Please enter a valid API key';
-                apiStatus.className = 'api-status';
+                apiStatus.className = 'api-status error';
             }
         });
 
-        // Execute code
-        executeBtn.addEventListener('click', async () => {
-            if (!ai) {
-                alert('Please enter your Google AI API key first');
-                return;
-            }
+        // Example chips
+        document.querySelectorAll('.example-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                queryInput.value = chip.dataset.query;
+                queryInput.focus();
+            });
+        });
 
-            const problem = problemText.textContent.trim();
-            const language = languageSelect.value;
-            const servings = parseInt(targetServings.value);
+        calculateBtn.addEventListener('click', async () => {
+            if (!ai) { alert('Please save your API key first.'); return; }
+            const query = queryInput.value.trim();
+            if (!query) { alert('Please enter a query or pick an example.'); return; }
 
-            if (!problem || !servings) {
-                alert('Please ensure all fields are filled');
-                return;
-            }
+            calculateBtn.disabled = true;
+            calculateBtn.textContent = '⏳ Running…';
+            statusRow.style.display = 'none';
+            explanationPanel.style.display = 'none';
 
-            executeBtn.disabled = true;
-            codeEditor.innerHTML = '<div class="loading">💻 Generating code...</div>';
-            executionResults.innerHTML = '<div class="loading">▶️ Executing and testing...</div>';
+            codeOutput.innerHTML = `<div class="loading-state"><div class="spinner"></div>Gemini is writing the Python code…</div>`;
+            execOutput.innerHTML = `<div class="loading-state"><div class="spinner"></div>Waiting for execution results…</div>`;
 
             try {
-                await generateAndExecuteCode(problem, language, servings);
-
-            } catch (error) {
-                console.error('Error generating/executing code:', error);
-                codeEditor.textContent = '// Error generating code';
-                executionResults.innerHTML = '<div class="loading">❌ Error generating or executing code</div>';
+                await runCalculation(query);
+            } catch (err) {
+                console.error(err);
+                codeOutput.textContent = `# Error: ${err.message}`;
+                execOutput.textContent = 'Could not complete the calculation. Check the console for details.';
             }
 
-            executeBtn.disabled = false;
+            calculateBtn.disabled = false;
+            calculateBtn.textContent = '▶ Generate & Run Python — Calculate';
         });
 
-        async function generateAndExecuteCode(problem, language, servings) {
-            // Generate and execute Python code with Gemini's code execution tool
-            const codePrompt = `Solve this recipe scaling problem by generating and running Python code: ${problem}
-
-Requirements:
-- Create a Python function that scales recipe ingredients for ${servings} servings
-- The original recipe serves 4 people
-- Execute the function and show the scaled results
-- Handle decimal values appropriately (round eggs to nearest 0.5)
-- Print both original and scaled ingredient amounts`;
+        async function runCalculation(query) {
+            const systemContext = `You are a helpful assistant for Australian university students.
+When asked about marks, grades, WAM, GPA, study hours, or academic planning, write and execute Python code to compute the answer precisely.
+Use Australian university conventions:
+- HD (High Distinction) ≥ 85, D (Distinction) 75–84, C (Credit) 65–74, P (Pass) 50–64, F (Fail) < 50
+- WAM = weighted average mark (weighted by credit points)
+- GPA uses the 7-point Australian scale: HD=7, D=6, C=5, P=4, F=0
+- Credit points (CP) indicate unit weight
+- "Swotvac" is the study vacation before exams
+Always print clear, labelled output with units. Use print() statements throughout so results are visible.`;
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: [{ text: codePrompt }],
+                model: 'gemini-2.5-flash',
+                contents: [{ role: 'user', parts: [{ text: query }] }],
                 config: {
+                    systemInstruction: systemContext,
                     tools: [{ codeExecution: {} }]
                 }
             });
 
-            // Process the response parts
             const parts = response?.candidates?.[0]?.content?.parts || [];
-            displayCodeExecutionResults(parts, servings);
+            displayResults(parts);
         }
 
-        function displayCodeExecutionResults(parts, servings) {
-            let generatedCode = '';
-            let executionOutput = '';
-            let explanationText = '';
+        function displayResults(parts) {
+            let code = '';
+            let output = '';
+            let explanation = '';
 
-            // Process each part according to the official API documentation
-            parts.forEach((part) => {
+            parts.forEach(part => {
                 if (part.text) {
-                    explanationText += part.text + '\n';
+                    explanation += part.text;
                 }
-
-                if (part.executableCode && part.executableCode.code) {
-                    generatedCode += part.executableCode.code + '\n';
+                if (part.executableCode?.code) {
+                    code += part.executableCode.code + '\n';
                 }
-
-                if (part.codeExecutionResult && part.codeExecutionResult.output) {
-                    executionOutput += part.codeExecutionResult.output + '\n';
+                if (part.codeExecutionResult?.output) {
+                    output += part.codeExecutionResult.output;
                 }
             });
 
-            // Display the generated code
-            if (generatedCode) {
-                codeEditor.textContent = generatedCode;
+            // Code panel
+            if (code.trim()) {
+                codeOutput.textContent = code.trim();
             } else {
-                codeEditor.textContent = explanationText || 'No code was generated';
+                codeOutput.innerHTML = `<div class="placeholder"><span class="placeholder-icon">⚠️</span>No Python code was generated</div>`;
             }
 
-            // Display execution results
-            const resultsHTML = `
-                <div class="result-section">
-                    <div class="result-title">💬 AI Explanation</div>
-                    <div class="result-content">${explanationText || 'No explanation provided'}</div>
-                </div>
-                
-                <div class="result-section">
-                    <div class="result-title">▶️ Code Execution Output</div>
-                    <div class="result-content">${executionOutput || 'No execution output available'}</div>
-                </div>
-                
-                <div class="result-section">
-                    <div class="result-title">🧪 Execution Status</div>
-                    <div class="test-results">
-                        <div class="test-case ${generatedCode ? 'success' : 'error'}">
-                            <div class="test-label">${generatedCode ? '✅' : '❌'} Code Generated</div>
-                            <div class="test-value">${generatedCode ? 'Python code created successfully' : 'No code generated'}</div>
-                        </div>
-                        <div class="test-case ${executionOutput ? 'success' : 'error'}">
-                            <div class="test-label">${executionOutput ? '✅' : '❌'} Code Executed</div>
-                            <div class="test-value">${executionOutput ? 'Code ran on Gemini servers' : 'No execution results'}</div>
-                        </div>
-                        <div class="test-case success">
-                            <div class="test-label">🎯 Target Servings</div>
-                            <div class="test-value">Scaling for ${servings} servings</div>
-                        </div>
-                        <div class="test-case success">
-                            <div class="test-label">📊 Scale Factor</div>
-                            <div class="test-value">${(servings / 4).toFixed(2)}x original recipe</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            // Execution output panel
+            if (output.trim()) {
+                execOutput.textContent = output.trim();
+            } else {
+                execOutput.innerHTML = `<div class="placeholder"><span class="placeholder-icon">⚠️</span>No execution output — code may not have printed results</div>`;
+            }
 
-            executionResults.innerHTML = resultsHTML;
+            // Explanation
+            const cleanExplanation = explanation.trim();
+            if (cleanExplanation) {
+                explanationOutput.innerHTML = formatExplanation(cleanExplanation);
+                explanationPanel.style.display = 'block';
+            }
+
+            // Status chips
+            const chips = [];
+            chips.push({ cls: code.trim() ? 'ok' : 'warn', label: code.trim() ? '✅ Code generated' : '⚠️ No code generated' });
+            chips.push({ cls: output.trim() ? 'ok' : 'warn', label: output.trim() ? '✅ Executed on Gemini servers' : '⚠️ No execution output' });
+            chips.push({ cls: 'info', label: '🐍 Python · Gemini 2.5 Flash' });
+
+            statusRow.innerHTML = chips.map(c =>
+                `<span class="status-chip ${c.cls}">${c.label}</span>`
+            ).join('');
+            statusRow.style.display = 'flex';
         }
 
-
-        // Initialize
-        executeBtn.disabled = !apiKey;
+        function formatExplanation(text) {
+            // Basic markdown-ish formatting: bold **x**, newlines → <br>
+            return text
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+        }
     </script>
 </body>
 </html>
-

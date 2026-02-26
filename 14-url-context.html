@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Blog Analyser</title>
+    <title>Australian Uni Course Analyser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -12,43 +15,82 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(160deg, #0f2d5e 0%, #1e4d8c 50%, #2d6ab4 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px 16px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
             overflow: hidden;
         }
 
+        /* ── Header ── */
         .header {
-            background: linear-gradient(135deg, #FD79A8 0%, #E84393 100%);
+            background: linear-gradient(135deg, #0f2d5e 0%, #1a4a8a 100%);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 32px 36px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -40px;
+            width: 250px; height: 250px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
+            opacity: 0.75;
+            font-size: 0.95rem;
+            font-weight: 400;
+            max-width: 520px;
         }
 
+        /* ── API Key ── */
         .api-key-section {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e1e1e1;
+            padding: 16px 36px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .api-key-group {
@@ -59,345 +101,705 @@
 
         #apiKeyInput {
             flex: 1;
-            padding: 10px;
-            border: 2px solid #e1e1e1;
+            padding: 9px 14px;
+            border: 1.5px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 0.9rem;
-            transition: border-color 0.3s ease;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: white;
         }
 
         #apiKeyInput:focus {
             outline: none;
-            border-color: #FD79A8;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
 
         #saveApiKey {
-            padding: 10px 20px;
-            background: #FD79A8;
+            padding: 9px 18px;
+            background: #1e3a5f;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: inherit;
+            transition: background 0.2s;
+            white-space: nowrap;
         }
 
-        #saveApiKey:hover {
-            background: #E84393;
-        }
+        #saveApiKey:hover { background: #0f2d5e; }
 
         .api-status {
-            margin-top: 10px;
+            margin-top: 7px;
             font-size: 0.8rem;
-            color: #666;
+            color: #64748b;
         }
 
-        .api-status.success {
-            color: #FD79A8;
-        }
+        .api-status.success { color: #059669; }
+        .api-status.error { color: #dc2626; }
 
+        /* ── Content ── */
         .content-section {
-            padding: 30px;
+            padding: 28px 36px 36px;
         }
 
+        /* ── Mode Tabs ── */
+        .mode-tabs {
+            display: flex;
+            gap: 0;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 28px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: inherit;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .mode-tab.active {
+            background: white;
+            color: #0f2d5e;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        /* ── URL Inputs ── */
         .url-inputs {
             display: grid;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .url-inputs.two-col {
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
         }
 
         .url-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .url-group label {
-            font-weight: 500;
-            color: #333;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .url-badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 1px 7px;
+            border-radius: 10px;
+            letter-spacing: 0.03em;
         }
 
         .url-input {
-            padding: 12px;
-            border: 2px solid #e1e1e1;
+            padding: 11px 14px;
+            border: 1.5px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
         }
 
         .url-input:focus {
             outline: none;
-            border-color: #FD79A8;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
 
-        .comparison-query {
-            margin-bottom: 30px;
+        /* ── Example URLs ── */
+        .examples-section {
+            margin-bottom: 22px;
         }
 
-        .query-title {
+        .examples-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 9px;
+        }
+
+        .example-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .example-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.78rem;
             font-weight: 500;
-            color: #333;
-            margin-bottom: 15px;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .example-chip:hover {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            color: #1d4ed8;
+        }
+
+        .chip-uni {
+            font-size: 0.68rem;
+            background: #e0e7ff;
+            color: #3730a3;
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-weight: 600;
+        }
+
+        /* ── Quick Questions ── */
+        .quick-questions {
+            margin-bottom: 20px;
+        }
+
+        .quick-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 9px;
+        }
+
+        .quick-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quick-btn {
+            padding: 8px 14px;
+            background: white;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #374151;
+            font-family: inherit;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .quick-btn:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            color: #1d4ed8;
+        }
+
+        .quick-btn .icon { font-size: 1rem; }
+
+        /* ── Query ── */
+        .query-section { margin-bottom: 20px; }
+
+        .query-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 7px;
+            display: block;
         }
 
         .query-input {
             width: 100%;
-            min-height: 100px;
-            padding: 15px;
-            border: 2px solid #e1e1e1;
+            min-height: 90px;
+            padding: 12px 14px;
+            border: 1.5px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.875rem;
+            font-family: inherit;
             resize: vertical;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            color: #1e293b;
+            line-height: 1.5;
         }
 
         .query-input:focus {
             outline: none;
-            border-color: #FD79A8;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
 
-        .analyze-btn {
+        /* ── Analyse Button ── */
+        .analyse-btn {
             width: 100%;
-            padding: 15px;
-            background: #FD79A8;
+            padding: 14px;
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 30px;
+            font-family: inherit;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .analyze-btn:hover {
-            background: #E84393;
-        }
+        .analyse-btn:hover:not(:disabled) { opacity: 0.9; }
+        .analyse-btn:active:not(:disabled) { transform: scale(0.99); }
 
-        .analyze-btn:disabled {
-            background: #ccc;
+        .analyse-btn:disabled {
+            background: #94a3b8;
             cursor: not-allowed;
         }
 
-        .results-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        /* ── Results ── */
+        .results-section { display: none; }
+        .results-section.visible { display: block; }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
         }
 
-        .result-panel {
-            background: #f8f9fa;
+        .results-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0f2d5e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .results-body {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
             border-radius: 10px;
-            padding: 20px;
-            min-height: 400px;
+            padding: 24px 28px;
+            min-height: 200px;
         }
 
-        .panel-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #FD79A8;
+        /* Markdown rendered output */
+        .results-body h1, .results-body h2, .results-body h3 {
+            color: #0f2d5e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .recipe-card {
-            background: white;
-            border: 1px solid #e1e1e1;
+        .results-body h1 { font-size: 1.3rem; margin-top: 0; border-bottom: 2px solid #dbeafe; padding-bottom: 8px; }
+        .results-body h2 { font-size: 1.1rem; border-left: 3px solid #2563eb; padding-left: 10px; }
+        .results-body h3 { font-size: 1rem; color: #1e40af; }
+
+        .results-body p { margin-bottom: 10px; line-height: 1.7; color: #374151; font-size: 0.9rem; }
+        .results-body ul, .results-body ol { padding-left: 22px; margin-bottom: 10px; }
+        .results-body li { margin-bottom: 5px; line-height: 1.6; color: #374151; font-size: 0.9rem; }
+        .results-body strong { color: #1e293b; font-weight: 600; }
+        .results-body em { color: #475569; }
+
+        .results-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.875rem;
+        }
+
+        .results-body th {
+            background: #0f2d5e;
+            color: white;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .results-body td {
+            padding: 9px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #374151;
+        }
+
+        .results-body tr:nth-child(even) td { background: #f1f5f9; }
+        .results-body tr:hover td { background: #dbeafe; }
+
+        .results-body hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 16px 0;
+        }
+
+        .results-body code {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        .results-body blockquote {
+            border-left: 3px solid #93c5fd;
+            padding-left: 14px;
+            color: #475569;
+            font-style: italic;
+            margin: 10px 0;
+        }
+
+        /* ── Sources ── */
+        .sources-section {
+            margin-top: 16px;
+            padding: 14px 18px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            font-size: 0.8rem;
+            color: #1d4ed8;
         }
 
-        .recipe-title {
-            font-weight: bold;
-            color: #FD79A8;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
+        .sources-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1e40af;
         }
 
-        .recipe-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
+        .source-url {
+            display: block;
+            color: #2563eb;
+            text-decoration: none;
+            margin-bottom: 3px;
+            word-break: break-all;
         }
 
-        .detail-item {
+        .source-url:hover { text-decoration: underline; }
+
+        /* ── Loading ── */
+        .loading-indicator {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-        }
-
-        .detail-label {
-            font-weight: 500;
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .detail-value {
-            color: #333;
-            font-weight: 500;
-        }
-
-        .recipe-ingredients {
-            margin-top: 15px;
-        }
-
-        .ingredients-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .ingredients-list {
-            background: #f8f9fa;
-            border: 1px solid #e1e1e1;
-            border-radius: 6px;
-            padding: 10px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .comparison-results {
-            background: white;
-            border: 1px solid #e1e1e1;
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .comparison-section {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .comparison-section:last-child {
-            border-bottom: none;
-        }
-
-        .comparison-title {
-            font-weight: 500;
-            color: #FD79A8;
-            margin-bottom: 10px;
-        }
-
-        .comparison-content {
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .difference-item {
-            background: #f8f9fa;
-            border-left: 4px solid #FD79A8;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 0 6px 6px 0;
-        }
-
-        .loading {
-            text-align: center;
-            color: #666;
-            font-style: italic;
+            align-items: center;
+            gap: 14px;
             padding: 40px;
+            color: #64748b;
         }
 
-        @media (max-width: 768px) {
-            .url-inputs {
-                grid-template-columns: 1fr;
-            }
-            
-            .results-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .api-key-group {
-                flex-direction: column;
-            }
-            
-            #saveApiKey {
-                width: 100%;
-            }
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
 
-            .recipe-details {
-                grid-template-columns: 1fr;
-            }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text { font-size: 0.9rem; font-weight: 500; }
+        .loading-sub { font-size: 0.8rem; opacity: 0.7; }
+
+        /* ── Error ── */
+        .error-box {
+            background: #fef2f2;
+            border: 1.5px solid #fca5a5;
+            border-radius: 8px;
+            padding: 16px 20px;
+            color: #dc2626;
+            font-size: 0.875rem;
+        }
+
+        .error-box strong { display: block; margin-bottom: 5px; }
+
+        /* ── Info Banner ── */
+        .info-banner {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 22px;
+            font-size: 0.83rem;
+            color: #1e40af;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .info-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+        /* ── Divider ── */
+        .section-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 22px 0;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 680px) {
+            .content-section { padding: 20px; }
+            .header { padding: 24px 20px; }
+            .api-key-section { padding: 14px 20px; }
+            .header h1 { font-size: 1.5rem; }
+            .url-inputs.two-col { grid-template-columns: 1fr; }
+            .quick-btns { flex-direction: column; }
+            .quick-btn { justify-content: center; }
+            .api-key-group { flex-direction: column; }
+            #saveApiKey { width: 100%; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+
+        <!-- Header -->
         <div class="header">
-            <h1>🌐 Recipe Blog Analyser</h1>
-            <p>Extract and compare recipes from food blog URLs</p>
+            <div class="header-badge">🌐 Gemini URL Context</div>
+            <h1>Australian Uni Course Analyser</h1>
+            <p>Paste any Australian university handbook URL and let Gemini extract, summarise, and compare course details — no copy-pasting required.</p>
         </div>
-        
+
+        <!-- API Key -->
         <div class="api-key-section">
             <div class="api-key-group">
-                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key…" maxlength="120">
                 <button id="saveApiKey">Save Key</button>
             </div>
-            <div class="api-status" id="apiStatus">Enter your Google AI API key to start analyzing blogs</div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to get started</div>
         </div>
-        
+
+        <!-- Main Content -->
         <div class="content-section">
-            <div class="url-inputs">
+
+            <!-- Info banner -->
+            <div class="info-banner">
+                <span class="info-icon">ℹ️</span>
+                <span>Gemini's <strong>URL Context</strong> tool fetches the live page content directly — works with ANU Programs &amp; Courses, UniMelb Handbook, UNSW Handbook, UQ Course Profiles, and more.</span>
+            </div>
+
+            <!-- Mode Tabs -->
+            <div class="mode-tabs">
+                <button class="mode-tab active" id="tabSingle" onclick="setMode('single')">📄 Analyse Single Unit</button>
+                <button class="mode-tab" id="tabCompare" onclick="setMode('compare')">⚖️ Compare Two Units</button>
+            </div>
+
+            <!-- URL inputs -->
+            <div class="url-inputs" id="urlInputsGrid">
                 <div class="url-group">
-                    <label for="url1Input">Recipe URL 1</label>
-                    <input type="url" class="url-input" id="url1Input" placeholder="https://example-food-blog.com/chocolate-chip-cookies" value="https://example-food-blog.com/chocolate-chip-cookies">
+                    <label for="url1Input">
+                        Unit Page URL
+                        <span class="url-badge">URL 1</span>
+                    </label>
+                    <input type="url" class="url-input" id="url1Input"
+                        placeholder="https://programsandcourses.anu.edu.au/course/COMP1100">
                 </div>
-                
-                <div class="url-group">
-                    <label for="url2Input">Recipe URL 2</label>
-                    <input type="url" class="url-input" id="url2Input" placeholder="https://example-food-blog.com/oatmeal-cookies" value="https://example-food-blog.com/oatmeal-cookies">
+                <div class="url-group" id="url2Group" style="display:none;">
+                    <label for="url2Input">
+                        Second Unit Page URL
+                        <span class="url-badge" style="background:#dcfce7;color:#166534;">URL 2</span>
+                    </label>
+                    <input type="url" class="url-input" id="url2Input"
+                        placeholder="https://programsandcourses.anu.edu.au/course/COMP1110">
                 </div>
             </div>
 
-            <div class="comparison-query">
-                <div class="query-title">Comparison Query</div>
-                <textarea class="query-input" id="queryInput" placeholder="Compare these two cookie recipes: baking time, temperature, and main differences">Compare these two cookie recipes: baking time, temperature, and main differences</textarea>
-            </div>
-            
-            <button class="analyze-btn" id="analyzeBtn">Analyze & Compare Recipes</button>
-            
-            <div class="results-section">
-                <div class="result-panel">
-                    <div class="panel-title">📄 Extracted Recipes</div>
-                    <div id="extractedRecipes">
-                        <div class="loading">Enter URLs and click "Analyze & Compare Recipes" to extract recipe data...</div>
+            <!-- Example URLs -->
+            <div class="examples-section">
+                <div class="examples-label">Try an example URL</div>
+                <div class="example-chips" id="exampleChips">
+                    <button class="example-chip" onclick="useExample('https://programsandcourses.anu.edu.au/course/COMP1100', 1)">
+                        <span class="chip-uni">ANU</span> COMP1100
+                    </button>
+                    <button class="example-chip" onclick="useExample('https://programsandcourses.anu.edu.au/course/ECON1010', 1)">
+                        <span class="chip-uni">ANU</span> ECON1010
+                    </button>
+                    <button class="example-chip" onclick="useExample('https://handbook.unimelb.edu.au/subjects/econ10001', 1)">
+                        <span class="chip-uni">UMelb</span> ECON10001
+                    </button>
+                    <button class="example-chip" onclick="useExample('https://www.handbook.unsw.edu.au/undergraduate/courses/2024/COMP1511', 1)">
+                        <span class="chip-uni">UNSW</span> COMP1511
+                    </button>
+                    <button class="example-chip" onclick="useExample('https://programsandcourses.anu.edu.au/course/STAT1008', 1)">
+                        <span class="chip-uni">ANU</span> STAT1008
+                    </button>
+                </div>
+                <!-- Compare-mode second URL examples (hidden initially) -->
+                <div id="examples2Row" style="display:none; margin-top:8px;">
+                    <div class="examples-label" style="margin-top:0;">URL 2 examples</div>
+                    <div class="example-chips">
+                        <button class="example-chip" onclick="useExample('https://programsandcourses.anu.edu.au/course/COMP1110', 2)">
+                            <span class="chip-uni">ANU</span> COMP1110
+                        </button>
+                        <button class="example-chip" onclick="useExample('https://programsandcourses.anu.edu.au/course/ECON1020', 2)">
+                            <span class="chip-uni">ANU</span> ECON1020
+                        </button>
+                        <button class="example-chip" onclick="useExample('https://handbook.unimelb.edu.au/subjects/econ10003', 2)">
+                            <span class="chip-uni">UMelb</span> ECON10003
+                        </button>
+                        <button class="example-chip" onclick="useExample('https://www.handbook.unsw.edu.au/undergraduate/courses/2024/COMP2041', 2)">
+                            <span class="chip-uni">UNSW</span> COMP2041
+                        </button>
                     </div>
                 </div>
-                
-                <div class="result-panel">
-                    <div class="panel-title">🔍 Recipe Comparison</div>
-                    <div class="comparison-results" id="comparisonResults">
-                        <div class="loading">Comparison results will appear here...</div>
-                    </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Quick Questions -->
+            <div class="quick-questions">
+                <div class="quick-label">Quick questions</div>
+                <div class="quick-btns" id="quickBtns">
+                    <!-- populated by JS based on mode -->
                 </div>
             </div>
+
+            <!-- Custom Query -->
+            <div class="query-section">
+                <label class="query-label" for="queryInput">Your question or instruction</label>
+                <textarea class="query-input" id="queryInput" rows="3"
+                    placeholder="Ask anything about the unit(s) — e.g. "What are the prerequisites?" or "Is this unit suitable for a first-year student?""></textarea>
+            </div>
+
+            <!-- Analyse Button -->
+            <button class="analyse-btn" id="analyseBtn" disabled>
+                <span id="btnIcon">🔍</span>
+                <span id="btnText">Analyse Unit</span>
+            </button>
+
+            <!-- Results -->
+            <div class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <div class="results-title">
+                        <span>📊</span>
+                        <span id="resultsTitle">Analysis Results</span>
+                    </div>
+                </div>
+                <div class="results-body" id="resultsBody"></div>
+                <div id="sourcesSection" style="display:none;" class="sources-section">
+                    <div class="sources-title">🔗 Sources fetched by Gemini</div>
+                    <div id="sourcesList"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script type="module">
-        // Import Google GenAI using ESM
-        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
 
+        // ── State ──
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
+        let currentMode = 'single';
 
-        // Initialize elements
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const apiStatus = document.getElementById('apiStatus');
-        const url1Input = document.getElementById('url1Input');
-        const url2Input = document.getElementById('url2Input');
-        const queryInput = document.getElementById('queryInput');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const extractedRecipes = document.getElementById('extractedRecipes');
-        const comparisonResults = document.getElementById('comparisonResults');
+        // ── DOM refs ──
+        const apiKeyInput  = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn= document.getElementById('saveApiKey');
+        const apiStatus    = document.getElementById('apiStatus');
+        const url1Input    = document.getElementById('url1Input');
+        const url2Input    = document.getElementById('url2Input');
+        const url2Group    = document.getElementById('url2Group');
+        const examples2Row = document.getElementById('examples2Row');
+        const queryInput   = document.getElementById('queryInput');
+        const analyseBtn   = document.getElementById('analyseBtn');
+        const btnIcon      = document.getElementById('btnIcon');
+        const btnText      = document.getElementById('btnText');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsBody    = document.getElementById('resultsBody');
+        const resultsTitle   = document.getElementById('resultsTitle');
+        const sourcesSection = document.getElementById('sourcesSection');
+        const sourcesList    = document.getElementById('sourcesList');
+        const urlInputsGrid  = document.getElementById('urlInputsGrid');
+        const tabSingle      = document.getElementById('tabSingle');
+        const tabCompare     = document.getElementById('tabCompare');
+        const quickBtnsContainer = document.getElementById('quickBtns');
 
-        // Load saved API key
+        // ── Quick question definitions ──
+        const quickSingle = [
+            { icon: '📋', label: 'Summarise this unit',        prompt: 'Please provide a comprehensive summary of this unit. Include: unit code and full name, credit points, a description of what students will learn, assessment structure with weightings, contact hours per week, semester offerings, and any prerequisites or assumed knowledge.' },
+            { icon: '🔑', label: 'Prerequisites & requirements', prompt: 'What are the prerequisites, co-requisites, incompatible units, and assumed knowledge for this unit? Who is it designed for?' },
+            { icon: '📝', label: 'Assessment breakdown',        prompt: 'Please provide a detailed breakdown of all assessments for this unit. List each assessment item, its type, its weighting as a percentage, any due dates or exam periods mentioned, and any important conditions like minimum pass marks.' },
+            { icon: '⏰', label: 'Contact hours & schedule',    prompt: 'How many contact hours per week does this unit involve? Break it down by lecture, tutorial, laboratory, workshop, or any other type of class. Also list which semesters or teaching periods it is offered in.' },
+        ];
+
+        const quickCompare = [
+            { icon: '⚖️', label: 'Side-by-side comparison',    prompt: 'Compare these two units side by side. For each, extract and compare: unit code and name, credit points, prerequisites, assessment structure and weightings, contact hours per week, semester offerings, and assumed knowledge. Present the comparison in a clear structured format.' },
+            { icon: '🎯', label: 'Which unit is harder?',       prompt: 'Based on the assessment structure, contact hours, prerequisites, and unit description, which of these two units appears to be more demanding? Explain your reasoning.' },
+            { icon: '🔑', label: 'Compare prerequisites',       prompt: 'Compare the prerequisites, co-requisites, incompatible units, and assumed knowledge for both units. Which unit is more accessible to a first-year student?' },
+            { icon: '🧑‍🎓', label: 'Which should I choose?',    prompt: 'If a student is deciding between these two units, what are the key factors to consider? Compare workload, assessment types, content areas, and who each unit is best suited for. Give a clear recommendation with reasoning.' },
+        ];
+
+        function renderQuickBtns() {
+            const questions = currentMode === 'single' ? quickSingle : quickCompare;
+            quickBtnsContainer.innerHTML = questions.map(q => `
+                <button class="quick-btn" onclick="setQuickQuery(${JSON.stringify(q.prompt)})">
+                    <span class="icon">${q.icon}</span> ${q.label}
+                </button>
+            `).join('');
+        }
+
+        window.setQuickQuery = function(prompt) {
+            queryInput.value = prompt;
+            queryInput.focus();
+        };
+
+        // ── Mode switching ──
+        window.setMode = function(mode) {
+            currentMode = mode;
+            if (mode === 'single') {
+                tabSingle.classList.add('active');
+                tabCompare.classList.remove('active');
+                url2Group.style.display = 'none';
+                examples2Row.style.display = 'none';
+                urlInputsGrid.classList.remove('two-col');
+                btnIcon.textContent = '🔍';
+                btnText.textContent = 'Analyse Unit';
+            } else {
+                tabCompare.classList.add('active');
+                tabSingle.classList.remove('active');
+                url2Group.style.display = 'flex';
+                examples2Row.style.display = 'block';
+                urlInputsGrid.classList.add('two-col');
+                btnIcon.textContent = '⚖️';
+                btnText.textContent = 'Compare Units';
+            }
+            renderQuickBtns();
+            resultsSection.classList.remove('visible');
+        };
+
+        // ── Example URL helper ──
+        window.useExample = function(url, slot) {
+            if (slot === 1) url1Input.value = url;
+            else url2Input.value = url;
+        };
+
+        // ── API Key ──
         if (apiKey) {
             apiKeyInput.value = apiKey;
             initializeAI();
@@ -405,14 +807,14 @@
 
         function initializeAI() {
             try {
-                ai = new GoogleGenAI({ apiKey: apiKey });
-                apiStatus.textContent = '✅ API key saved and ready!';
+                ai = new GoogleGenAI({ apiKey });
+                apiStatus.textContent = '✅ API key saved — ready to analyse';
                 apiStatus.className = 'api-status success';
-                analyzeBtn.disabled = false;
-            } catch (error) {
-                apiStatus.textContent = '❌ Invalid API key';
-                apiStatus.className = 'api-status';
-                analyzeBtn.disabled = true;
+                analyseBtn.disabled = false;
+            } catch {
+                apiStatus.textContent = '❌ Invalid API key format';
+                apiStatus.className = 'api-status error';
+                analyseBtn.disabled = true;
             }
         }
 
@@ -423,186 +825,84 @@
                 initializeAI();
             } else {
                 apiStatus.textContent = 'Please enter a valid API key';
-                apiStatus.className = 'api-status';
+                apiStatus.className = 'api-status error';
             }
         });
 
-        // Analyze recipes
-        analyzeBtn.addEventListener('click', async () => {
-            if (!ai) {
-                alert('Please enter your Google AI API key first');
-                return;
-            }
+        // ── Analyse ──
+        analyseBtn.addEventListener('click', async () => {
+            if (!ai) { alert('Please enter your Google AI API key first.'); return; }
 
             const url1 = url1Input.value.trim();
             const url2 = url2Input.value.trim();
-            const query = queryInput.value.trim();
+            const query = queryInput.value.trim() || (currentMode === 'single'
+                ? quickSingle[0].prompt
+                : quickCompare[0].prompt);
 
-            if (!url1 || !url2) {
-                alert('Please enter both recipe URLs');
-                return;
-            }
+            if (!url1) { alert('Please enter a unit page URL.'); url1Input.focus(); return; }
+            if (currentMode === 'compare' && !url2) { alert('Please enter a second unit URL to compare.'); url2Input.focus(); return; }
 
-            if (!query) {
-                alert('Please enter a comparison query');
-                return;
-            }
-
-            analyzeBtn.disabled = true;
-            extractedRecipes.innerHTML = '<div class="loading">🌐 Fetching and analyzing recipes...</div>';
-            comparisonResults.innerHTML = '<div class="loading">🔍 Comparing recipes...</div>';
+            // Show loading
+            analyseBtn.disabled = true;
+            btnText.textContent = 'Fetching page…';
+            resultsSection.classList.add('visible');
+            sourcesSection.style.display = 'none';
+            resultsTitle.textContent = currentMode === 'single' ? 'Analysing unit…' : 'Comparing units…';
+            resultsBody.innerHTML = `
+                <div class="loading-indicator">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Gemini is reading the handbook page${currentMode === 'compare' ? 's' : ''}…</div>
+                    <div class="loading-sub">This may take a few seconds while the URL context tool fetches content</div>
+                </div>`;
 
             try {
-                await processUrlsWithAI(url1, url2, query);
+                let prompt;
+                if (currentMode === 'single') {
+                    prompt = `You are an expert Australian university adviser. Using the URL context tool, please fetch and analyse this Australian university unit/course page:\n\n${url1}\n\n${query}\n\nFormat your response in clear Markdown with headings, bullet points, and tables where appropriate. Use Australian university terminology (unit, credit points, semester, tutorials, etc.).`;
+                } else {
+                    prompt = `You are an expert Australian university adviser. Using the URL context tool, please fetch and analyse these two Australian university unit/course pages:\n\nUnit 1: ${url1}\nUnit 2: ${url2}\n\n${query}\n\nFormat your response in clear Markdown with headings, bullet points, and comparison tables where appropriate. Use Australian university terminology (unit, credit points, semester, tutorials, etc.).`;
+                }
+
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.0-flash',
+                    contents: prompt,
+                    config: {
+                        tools: [{ urlContext: {} }],
+                    },
+                });
+
+                const mdText = response.text;
+                resultsBody.innerHTML = marked.parse(mdText);
+                resultsTitle.textContent = currentMode === 'single' ? 'Unit Analysis' : 'Unit Comparison';
+
+                // Show sources if available
+                try {
+                    const metadata = response.candidates?.[0]?.urlContextMetadata?.urlMetadata;
+                    if (metadata && metadata.length > 0) {
+                        sourcesList.innerHTML = metadata.map(m =>
+                            `<a href="${m.retrievedUrl}" class="source-url" target="_blank" rel="noopener">${m.retrievedUrl}</a>`
+                        ).join('');
+                        sourcesSection.style.display = 'block';
+                    }
+                } catch { /* metadata not available */ }
 
             } catch (error) {
-                console.error('Error analyzing recipes:', error);
-                extractedRecipes.innerHTML = '<div class="loading">❌ Error fetching recipes</div>';
-                comparisonResults.innerHTML = '<div class="loading">❌ Error comparing recipes</div>';
+                console.error('Analysis error:', error);
+                resultsBody.innerHTML = `
+                    <div class="error-box">
+                        <strong>⚠️ Error fetching or analysing the page</strong>
+                        ${error.message || 'An unexpected error occurred. Please check the URL and try again.'}
+                    </div>`;
+                resultsTitle.textContent = 'Error';
             }
 
-            analyzeBtn.disabled = false;
+            analyseBtn.disabled = false;
+            btnText.textContent = currentMode === 'single' ? 'Analyse Unit' : 'Compare Units';
         });
 
-        async function processUrlsWithAI(url1, url2, query) {
-            // Extract recipes from both URLs
-            const prompt = `Compare these two cookie recipes from the following URLs: ${url1} and ${url2}. 
-
-${query}
-
-Return a JSON object with:
-- recipes: array of two recipe objects, each with title, bakingTime, temperature, servings, difficulty, and ingredients array
-- comparison: object with bakingTimeDiff, temperatureDiff, and mainDifferences array
-
-Focus on extracting accurate baking times, temperatures, and ingredient differences.`;
-
-            const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: [{ text: prompt }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: Type.OBJECT,
-                        properties: {
-                            recipes: {
-                                type: Type.ARRAY,
-                                items: {
-                                    type: Type.OBJECT,
-                                    properties: {
-                                        url: { type: Type.STRING },
-                                        title: { type: Type.STRING },
-                                        bakingTime: { type: Type.STRING },
-                                        temperature: { type: Type.STRING },
-                                        servings: { type: Type.STRING },
-                                        difficulty: { type: Type.STRING },
-                                        ingredients: { 
-                                            type: Type.ARRAY, 
-                                            items: { type: Type.STRING } 
-                                        }
-                                    }
-                                }
-                            },
-                            comparison: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    bakingTimeDiff: { type: Type.STRING },
-                                    temperatureDiff: { type: Type.STRING },
-                                    mainDifferences: { 
-                                        type: Type.ARRAY, 
-                                        items: { type: Type.STRING } 
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Extract JSON from markdown code blocks if present
-            let jsonText = response.text;
-            if (jsonText.includes('```json')) {
-                const jsonMatch = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
-                if (jsonMatch) {
-                    jsonText = jsonMatch[1];
-                }
-            } else if (jsonText.includes('```')) {
-                const jsonMatch = jsonText.match(/```\s*([\s\S]*?)\s*```/);
-                if (jsonMatch) {
-                    jsonText = jsonMatch[1];
-                }
-            }
-            
-            const result = JSON.parse(jsonText.trim());
-            result.recipes[0].url = url1;
-            result.recipes[1].url = url2;
-            
-            displayExtractedRecipes(result.recipes);
-            displayComparisonFromAI(result.comparison);
-        }
-
-        function displayExtractedRecipes(recipes) {
-            const recipesHTML = recipes.map(recipe => `
-                <div class="recipe-card">
-                    <div class="recipe-title">${recipe.title}</div>
-                    <div class="recipe-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Baking Time</div>
-                            <div class="detail-value">${recipe.bakingTime}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Temperature</div>
-                            <div class="detail-value">${recipe.temperature}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Servings</div>
-                            <div class="detail-value">${recipe.servings}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Difficulty</div>
-                            <div class="detail-value">${recipe.difficulty}</div>
-                        </div>
-                    </div>
-                    <div class="recipe-ingredients">
-                        <div class="ingredients-title">Main Ingredients</div>
-                        <div class="ingredients-list">${recipe.ingredients.slice(0, 4).join(', ')}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            extractedRecipes.innerHTML = recipesHTML;
-        }
-
-        function displayComparisonFromAI(comparison) {
-            const comparisonHTML = `
-                <div class="comparison-section">
-                    <div class="comparison-title">⏰ Baking Time Comparison</div>
-                    <div class="comparison-content">
-                        ${comparison.bakingTimeDiff || 'Baking time comparison not available'}
-                    </div>
-                </div>
-                
-                <div class="comparison-section">
-                    <div class="comparison-title">🌡️ Temperature Difference</div>
-                    <div class="comparison-content">
-                        ${comparison.temperatureDiff || 'Temperature comparison not available'}
-                    </div>
-                </div>
-                
-                <div class="comparison-section">
-                    <div class="comparison-title">🥄 Main Ingredient Differences</div>
-                    <div class="comparison-content">
-                        ${(comparison.mainDifferences || []).map(diff => `
-                            <div class="difference-item">${diff}</div>
-                        `).join('') || '<div>No differences identified</div>'}
-                    </div>
-                </div>
-            `;
-
-            comparisonResults.innerHTML = comparisonHTML;
-        }
-
-        // Initialize
-        analyzeBtn.disabled = !apiKey;
+        // ── Init ──
+        renderQuickBtns();
+        analyseBtn.disabled = !apiKey;
     </script>
 </body>
 </html>

@@ -3,663 +3,913 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Card Digitiser</title>
+    <title>Timetable Digitiser — Gemini API Demo</title>
     <style>
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f2044 0%, #1e3a5f 50%, #243b55 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px 16px;
+            color: #1a202c;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 24px 64px rgba(0, 0, 20, 0.35);
             overflow: hidden;
         }
 
+        /* ── Header ── */
         .header {
-            background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+            background: linear-gradient(135deg, #1a3a6b 0%, #1e4d8c 100%);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 36px 40px;
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.9);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 16px;
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
+            opacity: 0.82;
+            font-size: 1.05rem;
+            max-width: 600px;
         }
 
+        /* ── API key strip ── */
         .api-key-section {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e1e1e1;
+            padding: 18px 40px;
+            background: #f0f4f9;
+            border-bottom: 1px solid #dde3ec;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .api-key-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .api-key-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4a5568;
+            white-space: nowrap;
         }
 
         #apiKeyInput {
             flex: 1;
-            padding: 10px;
-            border: 2px solid #e1e1e1;
+            min-width: 220px;
+            padding: 9px 14px;
+            border: 2px solid #cbd5e0;
             border-radius: 8px;
             font-size: 0.9rem;
-            transition: border-color 0.3s ease;
+            background: white;
+            transition: border-color 0.2s;
         }
 
         #apiKeyInput:focus {
             outline: none;
-            border-color: #3498DB;
+            border-color: #1e4d8c;
         }
 
         #saveApiKey {
-            padding: 10px 20px;
-            background: #3498DB;
+            padding: 9px 20px;
+            background: #1e4d8c;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.9rem;
-            transition: background-color 0.3s ease;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
         }
 
-        #saveApiKey:hover {
-            background: #2980B9;
-        }
+        #saveApiKey:hover { background: #163d73; }
 
         .api-status {
-            margin-top: 10px;
-            font-size: 0.8rem;
-            color: #666;
+            font-size: 0.82rem;
+            color: #718096;
+            width: 100%;
+            padding-top: 2px;
         }
 
-        .api-status.success {
-            color: #3498DB;
+        .api-status.success { color: #276749; font-weight: 500; }
+        .api-status.error   { color: #c53030; }
+
+        /* ── Main layout ── */
+        .main {
+            padding: 32px 40px;
         }
 
-        .content-section {
-            padding: 30px;
-        }
-
-        .upload-section {
-            border: 2px dashed #e1e1e1;
+        /* ── Tips banner ── */
+        .tips-banner {
+            background: #ebf4ff;
+            border: 1px solid #bee3f8;
             border-radius: 10px;
-            padding: 40px;
+            padding: 18px 22px;
+            margin-bottom: 28px;
+        }
+
+        .tips-banner h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1a3a6b;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 8px;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #2c5282;
+        }
+
+        .tip-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ── Upload area ── */
+        .upload-zone {
+            border: 2.5px dashed #a0aec0;
+            border-radius: 12px;
+            padding: 36px 24px;
             text-align: center;
-            margin-bottom: 30px;
-            transition: border-color 0.3s ease;
+            margin-bottom: 24px;
+            transition: border-color 0.2s, background 0.2s;
+            cursor: pointer;
+            position: relative;
         }
 
-        .upload-section.dragover {
-            border-color: #3498DB;
-            background: #f0f8ff;
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: #1e4d8c;
+            background: #f0f5ff;
         }
 
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #3498DB;
+        .upload-zone.has-image {
+            border-style: solid;
+            border-color: #4a90d9;
         }
 
-        .file-input {
-            display: none;
+        .upload-icon-wrap {
+            font-size: 2.6rem;
+            margin-bottom: 12px;
         }
 
-        .upload-btn {
-            padding: 12px 24px;
-            background: #3498DB;
+        .upload-zone h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+
+        .upload-zone p {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        #fileInput { display: none; }
+
+        .choose-btn {
+            padding: 10px 24px;
+            background: #1e4d8c;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
-            margin: 10px;
-            transition: background-color 0.3s ease;
+            font-size: 0.92rem;
+            font-weight: 600;
+            transition: background 0.2s;
         }
 
-        .upload-btn:hover {
-            background: #2980B9;
+        .choose-btn:hover { background: #163d73; }
+
+        .file-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #e6f0ff;
+            border: 1px solid #bee3f8;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 0.82rem;
+            color: #2c5282;
+            margin-top: 12px;
         }
 
-        .image-preview {
-            max-width: 300px;
-            max-height: 200px;
-            border-radius: 8px;
-            margin: 15px auto;
-            display: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .file-info {
-            background: #e8f5e8;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            display: none;
-        }
-
-        .processing-options {
+        /* ── Query + controls row ── */
+        .controls-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: end;
+            margin-bottom: 24px;
         }
 
-        .option-group {
+        .query-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
-        .option-group label {
-            font-weight: 500;
-            color: #333;
+        .query-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .option-group select {
-            padding: 12px;
-            border: 2px solid #e1e1e1;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .option-group select:focus {
-            outline: none;
-            border-color: #3498DB;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .process-btn {
+        #queryInput {
             width: 100%;
-            padding: 15px;
-            background: #3498DB;
+            padding: 12px 14px;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        #queryInput:focus {
+            outline: none;
+            border-color: #1e4d8c;
+        }
+
+        .example-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .chip {
+            padding: 5px 12px;
+            background: #edf2f7;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #4a5568;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+
+        .chip:hover {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            color: #1e40af;
+        }
+
+        .digitise-btn {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #1a3a6b, #1e4d8c);
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            transition: opacity 0.2s, transform 0.15s;
+            white-space: nowrap;
+            align-self: end;
         }
 
-        .process-btn:hover {
-            background: #2980B9;
+        .digitise-btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
 
-        .process-btn:disabled {
-            background: #ccc;
+        .digitise-btn:disabled {
+            background: #a0aec0;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .output-section {
+        /* ── Output area ── */
+        .output-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Left column: image + summary */
+        .left-col {
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
 
-        .output-panel {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            min-height: 400px;
+        .image-panel {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
         }
 
-        .panel-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #3498DB;
+        .panel-header {
+            padding: 12px 18px;
+            background: #edf2f7;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .extracted-text {
-            font-family: 'Georgia', serif;
-            line-height: 1.6;
-            color: #333;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e1e1e1;
+        .panel-header span {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        #imagePreview {
+            display: none;
+            width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            background: #f0f4f9;
+            padding: 8px;
+        }
+
+        .image-placeholder {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            color: #a0aec0;
+            font-size: 0.88rem;
+        }
+
+        .image-placeholder .ph-icon { font-size: 2.5rem; }
+
+        .summary-panel {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .summary-body {
+            padding: 18px;
+            font-size: 0.92rem;
+            line-height: 1.7;
+            color: #2d3748;
             white-space: pre-wrap;
+            min-height: 120px;
         }
 
-        .recipe-structure {
+        .summary-body.placeholder { color: #a0aec0; font-style: italic; }
+
+        /* Right column: structured schedule */
+        .schedule-panel {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .schedule-body {
+            padding: 18px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Day group */
+        .day-group {
+            margin-bottom: 20px;
+        }
+
+        .day-heading {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #1a3a6b;
+            padding: 4px 10px;
+            background: #dbeafe;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .class-card {
             background: white;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #1e4d8c;
             border-radius: 8px;
-            border: 1px solid #e1e1e1;
-        }
-
-        .recipe-section {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .recipe-section:last-child {
-            border-bottom: none;
-        }
-
-        .section-title {
-            font-weight: bold;
-            color: #3498DB;
+            padding: 12px 14px;
             margin-bottom: 8px;
         }
 
-        .ingredient-list {
-            list-style: none;
-            padding: 0;
+        .class-card:last-child { margin-bottom: 0; }
+
+        .class-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4px;
         }
 
-        .ingredient-list li {
-            padding: 4px 0;
-            border-left: 3px solid #3498DB;
-            padding-left: 10px;
-            margin: 5px 0;
+        .class-subject {
+            font-weight: 700;
+            color: #1a202c;
+            font-size: 0.95rem;
         }
 
-        .margin-note {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 6px;
-            padding: 8px;
-            margin: 5px 0;
+        .class-time {
+            font-size: 0.82rem;
+            color: #1e4d8c;
+            font-weight: 600;
+            background: #ebf4ff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+            margin-left: 8px;
+        }
+
+        .class-meta {
+            font-size: 0.82rem;
+            color: #718096;
+            margin-top: 2px;
+        }
+
+        .class-meta strong { color: #4a5568; }
+
+        .schedule-placeholder {
+            color: #a0aec0;
+            font-size: 0.88rem;
             font-style: italic;
-            color: #856404;
+            padding: 16px;
         }
 
-        .loading {
-            text-align: center;
-            color: #666;
+        /* Loading state */
+        .loading-state {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #718096;
             font-style: italic;
-            padding: 40px;
+            padding: 20px;
         }
 
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #1e4d8c;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Error state */
+        .error-msg {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 0.88rem;
+            margin: 12px;
+        }
+
+        /* ── Responsive ── */
         @media (max-width: 768px) {
-            .processing-options {
-                grid-template-columns: 1fr;
-            }
-            
-            .output-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .api-key-group {
-                flex-direction: column;
-            }
-            
-            #saveApiKey {
-                width: 100%;
-            }
+            .header { padding: 24px 20px; }
+            .header h1 { font-size: 1.6rem; }
+            .api-key-section { padding: 14px 20px; }
+            .main { padding: 20px; }
+            .controls-row { grid-template-columns: 1fr; }
+            .digitise-btn { width: 100%; }
+            .output-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+
+        <!-- Header -->
         <div class="header">
-            <h1>📄 Recipe Card Digitiser</h1>
-            <p>Extract and structure text from handwritten recipe cards</p>
+            <div class="header-badge">Gemini API · Vision / OCR</div>
+            <h1>📅 Handwritten Timetable Digitiser</h1>
+            <p>Upload a photo of any timetable — whiteboard, paper planner, printed timetable, sticky note — and Gemini will extract your class schedule instantly.</p>
         </div>
-        
+
+        <!-- API Key -->
         <div class="api-key-section">
-            <div class="api-key-group">
-                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
-                <button id="saveApiKey">Save Key</button>
-            </div>
-            <div class="api-status" id="apiStatus">Enter your Google AI API key to start digitising recipes</div>
+            <span class="api-key-label">Google AI API Key</span>
+            <input type="password" id="apiKeyInput" placeholder="Paste your API key here…" maxlength="200" autocomplete="off">
+            <button id="saveApiKey">Save Key</button>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to get started — get one free at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a></div>
         </div>
-        
-        <div class="content-section">
-            <div class="upload-section" id="uploadSection">
-                <div class="upload-icon">📷</div>
-                <h3>Upload Recipe Card Image</h3>
-                <p>Drag and drop an image here, or click to browse</p>
-                <input type="file" id="fileInput" class="file-input" accept="image/*">
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose Image</button>
-                <img id="imagePreview" class="image-preview" alt="Recipe card preview">
-                <div class="file-info" id="fileInfo">
-                    <strong>Image loaded:</strong> <span id="fileName"></span><br>
-                    <strong>Size:</strong> <span id="fileSize"></span>
+
+        <!-- Main -->
+        <div class="main">
+
+            <!-- Tips -->
+            <div class="tips-banner">
+                <h3>What works best</h3>
+                <div class="tips-grid">
+                    <div class="tip-item"><span class="tip-icon">📸</span><span><strong>Whiteboard photos</strong> — photograph from straight-on, good lighting</span></div>
+                    <div class="tip-item"><span class="tip-icon">📋</span><span><strong>Printed timetables</strong> — scanned or photographed from your faculty handbook</span></div>
+                    <div class="tip-item"><span class="tip-icon">🗒️</span><span><strong>Paper planners</strong> — weekly grid or bullet-journal layouts</span></div>
+                    <div class="tip-item"><span class="tip-icon">📌</span><span><strong>Sticky notes / hand-drawn grids</strong> — even rough sketches work</span></div>
                 </div>
             </div>
-            
-            <div class="processing-options">
-                <div class="option-group">
-                    <label for="extractionMode">Extraction Mode</label>
-                    <select id="extractionMode">
-                        <option value="Extract text and structure">Extract text and structure</option>
-                        <option value="Text only">Text only</option>
-                        <option value="Structure only">Structure only</option>
-                        <option value="Full analysis">Full analysis</option>
-                    </select>
-                </div>
-                
-                <div class="option-group">
-                    <label for="handwritingRecognition">Handwriting Recognition</label>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="handwritingRecognition" checked>
-                        <span>Enable advanced handwriting detection</span>
-                    </div>
+
+            <!-- Upload zone -->
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon-wrap">🖼️</div>
+                <h3>Drop your timetable photo here</h3>
+                <p>JPEG, PNG, GIF or WebP · up to 20 MB</p>
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp">
+                <button class="choose-btn" onclick="document.getElementById('fileInput').click()">Choose Image</button>
+                <div id="fileBadge" style="display:none" class="file-badge">
+                    <span>📄</span><span id="fileName"></span>
                 </div>
             </div>
-            
-            <button class="process-btn" id="processBtn">Process Recipe Card</button>
-            
-            <div class="output-section">
-                <div class="output-panel">
-                    <div class="panel-title">📝 Extracted Text</div>
-                    <div class="extracted-text" id="extractedText">
-                        Upload a recipe card image and click "Process Recipe Card" to extract the text...
+
+            <!-- Query row -->
+            <div class="controls-row">
+                <div class="query-group">
+                    <label for="queryInput">Extraction query</label>
+                    <input type="text" id="queryInput"
+                        value="Extract all classes and their times from this timetable"
+                        placeholder="What do you want Gemini to extract?">
+                    <div class="example-chips" id="exampleChips">
+                        <span class="chip">Extract all classes and their times</span>
+                        <span class="chip">What classes do I have on Wednesday?</span>
+                        <span class="chip">List everything with room numbers</span>
+                        <span class="chip">Convert this to a day-by-day schedule</span>
                     </div>
                 </div>
-                
-                <div class="output-panel">
-                    <div class="panel-title">🏗️ Structured Recipe</div>
-                    <div class="recipe-structure" id="structuredRecipe">
-                        <div class="loading">Structured recipe data will appear here...</div>
-                    </div>
-                </div>
+                <button class="digitise-btn" id="digitiseBtn" disabled>Digitise Timetable</button>
             </div>
-        </div>
-    </div>
+
+            <!-- Output -->
+            <div class="output-grid">
+
+                <!-- Left: image preview + text summary -->
+                <div class="left-col">
+                    <div class="image-panel">
+                        <div class="panel-header">
+                            <span>📷 Uploaded Image</span>
+                        </div>
+                        <div class="image-placeholder" id="imagePlaceholder">
+                            <span class="ph-icon">🖼️</span>
+                            <span>Image preview will appear here</span>
+                        </div>
+                        <img id="imagePreview" alt="Timetable preview">
+                    </div>
+
+                    <div class="summary-panel">
+                        <div class="panel-header">
+                            <span>📝 Text Summary</span>
+                        </div>
+                        <div class="summary-body placeholder" id="summaryBody">
+                            Upload a timetable and click "Digitise Timetable" to see the extracted text summary here.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: structured schedule -->
+                <div class="schedule-panel">
+                    <div class="panel-header">
+                        <span>🗓️ Structured Schedule</span>
+                    </div>
+                    <div class="schedule-body" id="scheduleBody">
+                        <div class="schedule-placeholder">Your extracted class schedule will appear here, grouped by day with subject, time, and location details.</div>
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- /main -->
+    </div><!-- /container -->
 
     <script type="module">
-        // Import Google GenAI using ESM
         import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
 
         let apiKey = localStorage.getItem('googleAiApiKey') || '';
         let ai = null;
-        let uploadedImage = null;
+        let uploadedFile = null;
 
-        // Initialize elements
-        const apiKeyInput = document.getElementById('apiKeyInput');
+        const apiKeyInput   = document.getElementById('apiKeyInput');
         const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const apiStatus = document.getElementById('apiStatus');
-        const uploadSection = document.getElementById('uploadSection');
-        const fileInput = document.getElementById('fileInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileName = document.getElementById('fileName');
-        const fileSize = document.getElementById('fileSize');
-        const extractionMode = document.getElementById('extractionMode');
-        const handwritingRecognition = document.getElementById('handwritingRecognition');
-        const processBtn = document.getElementById('processBtn');
-        const extractedText = document.getElementById('extractedText');
-        const structuredRecipe = document.getElementById('structuredRecipe');
+        const apiStatus     = document.getElementById('apiStatus');
+        const uploadZone    = document.getElementById('uploadZone');
+        const fileInput     = document.getElementById('fileInput');
+        const fileBadge     = document.getElementById('fileBadge');
+        const fileNameEl    = document.getElementById('fileName');
+        const imagePreview  = document.getElementById('imagePreview');
+        const imagePlaceholder = document.getElementById('imagePlaceholder');
+        const queryInput    = document.getElementById('queryInput');
+        const digitiseBtn   = document.getElementById('digitiseBtn');
+        const summaryBody   = document.getElementById('summaryBody');
+        const scheduleBody  = document.getElementById('scheduleBody');
 
-        // Load saved API key
         if (apiKey) {
             apiKeyInput.value = apiKey;
-            initializeAI();
+            initAI();
         }
 
-        function initializeAI() {
+        function initAI() {
             try {
-                ai = new GoogleGenAI({ apiKey: apiKey });
-                apiStatus.textContent = '✅ API key saved and ready!';
+                ai = new GoogleGenAI({ apiKey });
+                apiStatus.textContent = '✅ API key saved — ready to digitise!';
                 apiStatus.className = 'api-status success';
-                updateProcessButton();
-            } catch (error) {
-                apiStatus.textContent = '❌ Invalid API key';
-                apiStatus.className = 'api-status';
-                processBtn.disabled = true;
+            } catch {
+                apiStatus.textContent = '❌ Could not initialise with that key.';
+                apiStatus.className = 'api-status error';
+                ai = null;
             }
+            refreshBtn();
         }
 
-        function updateProcessButton() {
-            processBtn.disabled = !(ai && uploadedImage);
+        function refreshBtn() {
+            digitiseBtn.disabled = !(ai && uploadedFile);
         }
 
         saveApiKeyBtn.addEventListener('click', () => {
             apiKey = apiKeyInput.value.trim();
-            if (apiKey) {
-                localStorage.setItem('googleAiApiKey', apiKey);
-                initializeAI();
-            } else {
-                apiStatus.textContent = 'Please enter a valid API key';
-                apiStatus.className = 'api-status';
+            if (!apiKey) {
+                apiStatus.textContent = 'Please enter a valid API key.';
+                apiStatus.className = 'api-status error';
+                return;
+            }
+            localStorage.setItem('googleAiApiKey', apiKey);
+            initAI();
+        });
+
+        // ── Example chips ──
+        document.getElementById('exampleChips').addEventListener('click', (e) => {
+            if (e.target.classList.contains('chip')) {
+                queryInput.value = e.target.textContent.trim();
             }
         });
 
-        // File upload handling
-        fileInput.addEventListener('change', handleFileUpload);
+        // ── File upload ──
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
 
-        // Drag and drop
-        uploadSection.addEventListener('dragover', (e) => {
+        uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadSection.classList.add('dragover');
+            uploadZone.classList.add('dragover');
         });
-
-        uploadSection.addEventListener('dragleave', () => {
-            uploadSection.classList.remove('dragover');
-        });
-
-        uploadSection.addEventListener('drop', (e) => {
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadSection.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
         });
 
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                handleFile(file);
-            }
-        }
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
         function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                alert('Please upload an image file');
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                alert('Please upload a JPEG, PNG, GIF, or WebP image.');
                 return;
             }
+            uploadedFile = file;
+            fileNameEl.textContent = file.name;
+            fileBadge.style.display = 'inline-flex';
+            uploadZone.classList.add('has-image');
 
-            uploadedImage = file;
-            fileName.textContent = file.name;
-            fileSize.textContent = formatFileSize(file.size);
-            
-            // Show image preview
             const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
+            reader.onload = (ev) => {
+                imagePreview.src = ev.target.result;
                 imagePreview.style.display = 'block';
+                imagePlaceholder.style.display = 'none';
             };
             reader.readAsDataURL(file);
-            
-            fileInfo.style.display = 'block';
-            updateProcessButton();
+
+            refreshBtn();
         }
 
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
+        // ── Digitise ──
+        digitiseBtn.addEventListener('click', async () => {
+            if (!ai || !uploadedFile) return;
 
-        // Process recipe card
-        processBtn.addEventListener('click', async () => {
-            if (!ai || !uploadedImage) {
-                alert('Please enter your API key and upload an image first');
-                return;
-            }
+            const query = queryInput.value.trim() || 'Extract all classes and their times from this timetable';
 
-            processBtn.disabled = true;
-            extractedText.innerHTML = '<div class="loading">📄 Extracting text from recipe card...</div>';
-            structuredRecipe.innerHTML = '<div class="loading">🏗️ Structuring recipe data...</div>';
+            digitiseBtn.disabled = true;
+            summaryBody.className = 'summary-body';
+            summaryBody.innerHTML = '<div class="loading-state"><div class="spinner"></div>Reading your timetable…</div>';
+            scheduleBody.innerHTML = '<div class="loading-state"><div class="spinner"></div>Structuring your schedule…</div>';
 
             try {
-                // Convert image to base64
-                const base64Image = await convertToBase64(uploadedImage);
-                
-                const prompt = handwritingRecognition.checked 
-                    ? `Extract all text from this handwritten recipe card image. Pay special attention to handwriting, cursive text, and any margin notes. Separate the main recipe from any additional notes.`
-                    : `Extract all text from this recipe card image.`;
+                const base64 = await toBase64(uploadedFile);
 
-                const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
-                    contents: [{
-                        text: prompt,
-                    }, {
-                        inlineData: {
-                            mimeType: uploadedImage.type,
-                            data: base64Image,
+                // ── Step 1: OCR + text summary ──
+                const summaryPrompt = `You are helping an Australian university student digitise a handwritten or photographed timetable.
+
+Task: ${query}
+
+Instructions:
+- Read all text carefully, including handwritten, printed, or partly visible text.
+- Identify class sessions: subject/unit name, day of week, start and end time, room/building/campus location, and any notes.
+- Write a clear, readable text summary of the full timetable.
+- Use Australian university terminology: "unit", "tutorial", "lecture", "lab", "workshop", "seminar", "campus".
+- If something is unclear, make a best guess and note it with "(unclear)".
+
+Respond with ONLY the plain-text summary.`;
+
+                const summaryResponse = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: [
+                        {
+                            inlineData: {
+                                mimeType: uploadedFile.type,
+                                data: base64,
+                            },
                         },
-                    }],
+                        { text: summaryPrompt },
+                    ],
                 });
 
-                // Display extracted text
-                const extractedContent = response.text;
-                extractedText.textContent = extractedContent;
+                const summaryText = summaryResponse.text;
+                summaryBody.className = 'summary-body';
+                summaryBody.textContent = summaryText;
 
-                // Structure the recipe
-                await structureRecipe(extractedContent);
+                // ── Step 2: structured schedule ──
+                const structurePrompt = `You are helping an Australian university student. Based on this timetable summary, extract each class session as structured data.
 
-            } catch (error) {
-                console.error('Error processing recipe card:', error);
-                extractedText.innerHTML = '<div class="loading">❌ Error extracting text. Please try again.</div>';
-                structuredRecipe.innerHTML = '<div class="loading">❌ Error structuring recipe.</div>';
+Timetable summary:
+${summaryText}
+
+Return a JSON object with a single key "days", which is an array. Each element represents one day:
+{
+  "day": "Monday",
+  "classes": [
+    {
+      "subject": "Introduction to Psychology",
+      "type": "Lecture",
+      "time": "9:00 AM – 11:00 AM",
+      "location": "Room G12, Building 3",
+      "notes": ""
+    }
+  ]
+}
+
+Rules:
+- Use Australian university terms: Lecture, Tutorial, Lab, Workshop, Seminar, Studio.
+- Order days Monday–Sunday. Only include days that have classes.
+- If a field is unknown, use an empty string.
+- Return ONLY valid JSON.`;
+
+                const structureResponse = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: [{ text: structurePrompt }],
+                    config: {
+                        responseMimeType: 'application/json',
+                        responseSchema: {
+                            type: Type.OBJECT,
+                            properties: {
+                                days: {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            day: { type: Type.STRING },
+                                            classes: {
+                                                type: Type.ARRAY,
+                                                items: {
+                                                    type: Type.OBJECT,
+                                                    properties: {
+                                                        subject:  { type: Type.STRING },
+                                                        type:     { type: Type.STRING },
+                                                        time:     { type: Type.STRING },
+                                                        location: { type: Type.STRING },
+                                                        notes:    { type: Type.STRING },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+
+                const parsed = JSON.parse(stripJsonFences(structureResponse.text));
+                renderSchedule(parsed.days || []);
+
+            } catch (err) {
+                console.error(err);
+                const msg = `<div class="error-msg">⚠️ ${err.message || 'Something went wrong. Check your API key and try again.'}</div>`;
+                if (summaryBody.querySelector('.loading-state')) summaryBody.innerHTML = msg;
+                scheduleBody.innerHTML = msg;
             }
 
-            processBtn.disabled = false;
+            digitiseBtn.disabled = false;
+            refreshBtn();
         });
 
-        async function convertToBase64(file) {
+        function toBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => {
-                    const base64 = reader.result.split(',')[1];
-                    resolve(base64);
-                };
+                reader.onload = () => resolve(reader.result.split(',')[1]);
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
         }
 
-        async function structureRecipe(extractedContent) {
-            try {
-                const structurePrompt = `Analyze this extracted recipe text and structure it into clear sections. Return a JSON object with:
-- title: recipe name
-- ingredients: array of ingredients with quantities
-- instructions: cooking steps
-- temperature: cooking temperature if mentioned
-- time: cooking time if mentioned
-- marginNotes: array of any margin notes or additional comments
+        function stripJsonFences(text) {
+            const m = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+            return m ? m[1] : text.trim();
+        }
 
-Text: ${extractedContent}`;
+        const TYPE_COLOURS = {
+            'lecture':  '#1e4d8c',
+            'tutorial': '#276749',
+            'lab':      '#7b341e',
+            'workshop': '#553c9a',
+            'seminar':  '#975a16',
+            'studio':   '#2c7a7b',
+        };
 
-                const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
-                    contents: [{ text: structurePrompt }],
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: Type.OBJECT,
-                            properties: {
-                                title: { type: Type.STRING },
-                                ingredients: { 
-                                    type: Type.ARRAY, 
-                                    items: { type: Type.STRING } 
-                                },
-                                instructions: { type: Type.STRING },
-                                temperature: { type: Type.STRING },
-                                time: { type: Type.STRING },
-                                marginNotes: { 
-                                    type: Type.ARRAY, 
-                                    items: { type: Type.STRING } 
-                                }
-                            }
-                        }
-                    }
-                });
+        function typeColour(t) {
+            return TYPE_COLOURS[(t || '').toLowerCase()] || '#4a5568';
+        }
 
-                // Extract JSON from markdown code blocks if present
-                let jsonText = response.text;
-                if (jsonText.includes('```json')) {
-                    const jsonMatch = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
-                    if (jsonMatch) {
-                        jsonText = jsonMatch[1];
-                    }
-                } else if (jsonText.includes('```')) {
-                    const jsonMatch = jsonText.match(/```\s*([\s\S]*?)\s*```/);
-                    if (jsonMatch) {
-                        jsonText = jsonMatch[1];
-                    }
-                }
-
-                const structuredData = JSON.parse(jsonText.trim());
-                displayStructuredRecipe(structuredData);
-
-            } catch (error) {
-                console.error('Error structuring recipe:', error);
-                structuredRecipe.innerHTML = '<div class="loading">❌ Error structuring recipe data.</div>';
+        function renderSchedule(days) {
+            if (!days.length) {
+                scheduleBody.innerHTML = '<div class="schedule-placeholder">No class sessions were found in the image. Try a clearer photo or a different query.</div>';
+                return;
             }
+
+            scheduleBody.innerHTML = days.map(day => `
+                <div class="day-group">
+                    <div class="day-heading">${escHtml(day.day)}</div>
+                    ${(day.classes || []).map(cls => {
+                        const accent = typeColour(cls.type);
+                        return `
+                        <div class="class-card" style="border-left-color:${accent}">
+                            <div class="class-header">
+                                <div class="class-subject">${escHtml(cls.subject || '—')}</div>
+                                ${cls.time ? `<div class="class-time">${escHtml(cls.time)}</div>` : ''}
+                            </div>
+                            <div class="class-meta">
+                                ${cls.type ? `<strong style="color:${accent}">${escHtml(cls.type)}</strong>` : ''}
+                                ${cls.location ? ` &nbsp;·&nbsp; 📍 ${escHtml(cls.location)}` : ''}
+                                ${cls.notes ? `<br><span style="color:#718096">📌 ${escHtml(cls.notes)}</span>` : ''}
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            `).join('');
         }
 
-        function displayStructuredRecipe(recipe) {
-            structuredRecipe.innerHTML = `
-                <div class="recipe-section">
-                    <div class="section-title">Recipe Title</div>
-                    <div>${recipe.title || 'Recipe title not found'}</div>
-                </div>
-                
-                <div class="recipe-section">
-                    <div class="section-title">Ingredients</div>
-                    <ul class="ingredient-list">
-                        ${(recipe.ingredients || []).map(ingredient => `<li>${ingredient}</li>`).join('')}
-                    </ul>
-                </div>
-                
-                <div class="recipe-section">
-                    <div class="section-title">Instructions</div>
-                    <div>${recipe.instructions || 'Instructions not found'}</div>
-                </div>
-                
-                <div class="recipe-section">
-                    <div class="section-title">Temperature & Time</div>
-                    <div>
-                        ${recipe.temperature ? `<strong>Temperature:</strong> ${recipe.temperature}<br>` : ''}
-                        ${recipe.time ? `<strong>Time:</strong> ${recipe.time}` : ''}
-                    </div>
-                </div>
-                
-                <div class="recipe-section">
-                    <div class="section-title">Margin Notes</div>
-                    ${(recipe.marginNotes || []).map(note => `<div class="margin-note">${note}</div>`).join('') || '<div>No margin notes found</div>'}
-                </div>
-            `;
+        function escHtml(str) {
+            return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
-        // Initialize
-        updateProcessButton();
+        refreshBtn();
     </script>
 </body>
 </html>

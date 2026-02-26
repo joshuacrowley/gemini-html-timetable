@@ -3,722 +3,1059 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Kitchen Assistant</title>
+    <title>UniSched — AI Timetable Assistant</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary:       #003087;
+            --primary-light: #1a47a3;
+            --accent:        #f5a623;
+            --bg:            #f0f2f5;
+            --card:          #ffffff;
+            --border:        #e2e8f0;
+            --text:          #1a202c;
+            --text-muted:    #718096;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #00B894 0%, #00CEC9 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-
-        .api-key-section {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e1e1e1;
-        }
-
-        .api-key-group {
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+        }
+
+        /* ── Header ──────────────────────────────────────────────── */
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 14px 24px;
+            display: flex;
             align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            flex-shrink: 0;
         }
 
-        #apiKeyInput {
+        .logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+        .header-sub { font-size: 0.82rem; opacity: 0.75; margin-top: 2px; }
+
+        /* ── API Bar ─────────────────────────────────────────────── */
+        .api-bar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .api-bar label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .api-bar input {
             flex: 1;
-            padding: 10px;
-            border: 2px solid #e1e1e1;
+            padding: 7px 12px;
+            border: 1px solid var(--border);
             border-radius: 8px;
-            font-size: 0.9rem;
-            transition: border-color 0.3s ease;
+            font-size: 0.88rem;
+            max-width: 420px;
         }
 
-        #apiKeyInput:focus {
-            outline: none;
-            border-color: #00B894;
-        }
+        .api-bar input:focus { outline: none; border-color: var(--primary); }
 
-        #saveApiKey {
-            padding: 10px 20px;
-            background: #00B894;
+        .btn-connect {
+            padding: 7px 16px;
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
+            font-size: 0.88rem;
+            white-space: nowrap;
+            font-weight: 500;
         }
 
-        #saveApiKey:hover {
-            background: #00CEC9;
+        .btn-connect:hover { background: var(--primary-light); }
+
+        .api-status { font-size: 0.78rem; color: var(--text-muted); }
+        .api-status.ok  { color: #38a169; font-weight: 600; }
+        .api-status.err { color: #e53e3e; }
+
+        /* ── Main layout ─────────────────────────────────────────── */
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
         }
 
-        .api-status {
-            margin-top: 10px;
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .api-status.success {
-            color: #00B894;
-        }
-
-        .content-section {
-            padding: 30px;
-        }
-
-        .chat-interface {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-            min-height: 400px;
+        /* ── Chat pane ───────────────────────────────────────────── */
+        .chat-pane {
+            width: 380px;
+            min-width: 300px;
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
+            background: white;
+            border-right: 1px solid var(--border);
+        }
+
+        .chat-pane-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--text);
         }
 
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            margin-bottom: 20px;
-            max-height: 350px;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-
-        .message.user {
-            background: #00B894;
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.assistant {
-            background: white;
-            color: #333;
-            border: 1px solid #e1e1e1;
-            border-bottom-left-radius: 4px;
-        }
-
-        .message.system {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-            margin: 10px auto;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .function-call {
-            background: #e8f5e8;
-            border: 1px solid #c3e6cb;
-            border-radius: 8px;
-            padding: 10px;
-            margin: 8px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-        }
-
-        .function-name {
-            color: #00B894;
-            font-weight: bold;
-        }
-
-        .function-params {
-            color: #666;
-            margin-top: 4px;
-        }
-
-        .chat-input-section {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e1e1e1;
-            border-radius: 20px;
-            font-size: 1rem;
-            resize: none;
-            min-height: 44px;
-            max-height: 100px;
-            transition: border-color 0.3s ease;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: #00B894;
-        }
-
-        .send-btn {
-            padding: 12px 20px;
-            background: #00B894;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-            min-width: 80px;
-        }
-
-        .send-btn:hover {
-            background: #00CEC9;
-        }
-
-        .send-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .timer-panel {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #e1e1e1;
-        }
-
-        .panel-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #00B894;
-        }
-
-        .active-timers {
+            padding: 14px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .timer-item {
-            background: #f8f9fa;
-            border: 1px solid #e1e1e1;
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            justify-content: between;
-            align-items: center;
+        .msg {
+            padding: 10px 13px;
+            border-radius: 16px;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
-        .timer-info {
-            flex: 1;
-        }
-
-        .timer-name {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .timer-time {
-            color: #00B894;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .timer-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .timer-btn {
-            padding: 6px 12px;
-            border: 1px solid #00B894;
-            background: white;
-            color: #00B894;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-        }
-
-        .timer-btn:hover {
-            background: #00B894;
+        .msg.user {
+            background: var(--primary);
             color: white;
+            align-self: flex-end;
+            max-width: 88%;
+            border-bottom-right-radius: 4px;
         }
 
-        .quick-commands {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .msg.assistant {
+            background: #f7fafc;
+            color: var(--text);
+            border: 1px solid var(--border);
+            align-self: flex-start;
+            max-width: 92%;
+            border-bottom-left-radius: 4px;
         }
 
-        .command-title {
-            font-weight: 500;
-            color: #856404;
-            margin-bottom: 10px;
-        }
-
-        .command-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
-
-        .command-item {
-            background: white;
-            border: 1px solid #ffeaa7;
-            border-radius: 6px;
-            padding: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .command-item:hover {
-            background: #ffeaa7;
-        }
-
-        .empty-timers {
+        .msg.system-note {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            align-self: center;
             text-align: center;
-            color: #666;
-            font-style: italic;
-            padding: 40px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            max-width: 100%;
+            padding: 8px 12px;
         }
 
-        .loading {
-            color: #666;
+        /* Function call indicator */
+        .fn-indicator {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-left: 3px solid #10b981;
+            border-radius: 8px;
+            padding: 8px 11px;
+            font-size: 0.78rem;
+            align-self: flex-start;
+            max-width: 96%;
+        }
+
+        .fn-indicator .fn-name {
+            font-weight: 700;
+            color: #065f46;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 3px;
+        }
+
+        .fn-indicator .fn-args {
+            color: #047857;
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            font-size: 0.72rem;
+            white-space: pre-wrap;
+        }
+
+        .fn-indicator .fn-result {
+            color: #064e3b;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px solid #a7f3d0;
             font-style: italic;
         }
 
-        @media (max-width: 768px) {
-            .api-key-group {
-                flex-direction: column;
-            }
-            
-            #saveApiKey {
+        /* Typing indicator */
+        .typing {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 10px 14px;
+            background: #f7fafc;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .typing-dot {
+            width: 6px; height: 6px;
+            background: #a0aec0;
+            border-radius: 50%;
+            animation: tdot 1.2s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes tdot {
+            0%,60%,100% { transform: translateY(0); }
+            30%          { transform: translateY(-5px); }
+        }
+
+        /* Starter chips */
+        .starters {
+            padding: 10px 14px;
+            border-top: 1px solid var(--border);
+            background: #fafafa;
+        }
+
+        .starters-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 7px;
+        }
+
+        .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+
+        .chip {
+            background: white;
+            border: 1px solid #c7d2fe;
+            color: #3730a3;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.74rem;
+            cursor: pointer;
+            line-height: 1.5;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .chip:hover { background: #e0e7ff; border-color: #6366f1; }
+
+        /* Input row */
+        .chat-input-row {
+            padding: 10px 14px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 9px 14px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.88rem;
+            resize: none;
+            min-height: 38px;
+            max-height: 100px;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+
+        .chat-input:focus { outline: none; border-color: var(--primary); }
+
+        .send-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+
+        .send-btn:hover    { background: var(--primary-light); }
+        .send-btn:disabled { background: #cbd5e0; cursor: not-allowed; }
+
+        /* ── Timetable pane ──────────────────────────────────────── */
+        .tt-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .tt-pane-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .tt-title { font-weight: 700; font-size: 0.95rem; }
+        .tt-sub   { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+        .tt-count { font-size: 0.82rem; color: var(--text-muted); }
+
+        .tt-scroll {
+            flex: 1;
+            overflow: auto;
+            padding: 16px 20px;
+        }
+
+        /* Grid structure */
+        .tt-outer {
+            display: flex;
+            min-width: 560px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .time-col {
+            width: 56px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .time-col-top {
+            height: 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .time-label {
+            height: 60px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 3px 8px 0;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .days-row {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .day-col {
+            flex: 1;
+            min-width: 0;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .day-col:last-child { border-right: none; }
+
+        .day-col-hdr {
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.78rem;
+            letter-spacing: 0.03em;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            flex-shrink: 0;
+        }
+
+        .day-body {
+            position: relative;
+            flex: 1;
+            height: 720px; /* 12 h × 60px */
+        }
+
+        .h-line {
+            position: absolute;
+            left: 0; right: 0;
+            border-top: 1px solid var(--border);
+            pointer-events: none;
+        }
+
+        .h-half {
+            position: absolute;
+            left: 0; right: 0;
+            border-top: 1px dashed #edf2f7;
+            pointer-events: none;
+        }
+
+        /* Class cards */
+        .class-card {
+            position: absolute;
+            left: 2px; right: 2px;
+            border-radius: 6px;
+            padding: 3px 6px;
+            overflow: hidden;
+            cursor: default;
+            z-index: 1;
+            border-left: 3px solid;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            transition: transform 0.12s, box-shadow 0.12s;
+        }
+
+        .class-card:hover {
+            transform: scale(1.015);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+            z-index: 10;
+        }
+
+        .cc-code { font-weight: 800; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cc-type { font-size: 0.62rem; opacity: 0.82; }
+        .cc-loc  { font-size: 0.58rem; opacity: 0.72; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Legend */
+        .legend {
+            padding: 10px 20px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: white;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .legend-lbl { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.74rem; }
+
+        .legend-dot { width: 11px; height: 11px; border-radius: 3px; }
+
+        /* ── Responsive ──────────────────────────────────────────── */
+        @media (max-width: 800px) {
+            .main { flex-direction: column-reverse; overflow: auto; }
+
+            .chat-pane {
                 width: 100%;
+                min-width: unset;
+                height: 55vh;
+                min-height: 380px;
+                border-right: none;
+                border-top: 1px solid var(--border);
             }
 
-            .message {
-                max-width: 95%;
-            }
+            .tt-pane { height: 45vh; min-height: 300px; }
 
-            .chat-input-section {
-                flex-direction: column;
-            }
-
-            .send-btn {
-                width: 100%;
-            }
+            .api-bar input { max-width: none; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔧 Smart Kitchen Assistant</h1>
-            <p>Control kitchen timers with natural language</p>
-        </div>
-        
-        <div class="api-key-section">
-            <div class="api-key-group">
-                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
-                <button id="saveApiKey">Save Key</button>
-            </div>
-            <div class="api-status" id="apiStatus">Enter your Google AI API key to start using the assistant</div>
-        </div>
-        
-        <div class="content-section">
-            <div class="quick-commands">
-                <div class="command-title">🚀 Try these commands:</div>
-                <div class="command-list">
-                    <div class="command-item" onclick="sendCommand('Set a timer for 15 minutes for the pasta')">Set a timer for 15 minutes for the pasta</div>
-                    <div class="command-item" onclick="sendCommand('What timers are currently running?')">What timers are currently running?</div>
-                    <div class="command-item" onclick="sendCommand('Add 5 more minutes to the pasta timer')">Add 5 more minutes to the pasta timer</div>
-                    <div class="command-item" onclick="sendCommand('Set another timer for 8 minutes for the garlic bread')">Set another timer for 8 minutes for the garlic bread</div>
-                </div>
-            </div>
 
-            <div class="chat-interface">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message system">Welcome! I can help you manage kitchen timers. Try saying something like "Set a timer for 15 minutes for pasta"</div>
-                </div>
-                
-                <div class="chat-input-section">
-                    <textarea class="chat-input" id="chatInput" placeholder="Type your command here..." rows="1"></textarea>
-                    <button class="send-btn" id="sendBtn">Send</button>
-                </div>
+<div class="header">
+    <div>
+        <div class="logo">Uni<span>Sched</span></div>
+        <div class="header-sub">AI-Powered Timetable Assistant · Powered by Gemini</div>
+    </div>
+</div>
+
+<div class="api-bar">
+    <label for="apiKeyInput">Google AI API Key</label>
+    <input type="password" id="apiKeyInput" placeholder="AIza..." maxlength="100" autocomplete="off">
+    <button class="btn-connect" id="saveApiKey">Connect</button>
+    <span class="api-status" id="apiStatus">Enter your API key to get started</span>
+</div>
+
+<div class="main">
+
+    <!-- ── Chat ──────────────────────────────────────────────────── -->
+    <div class="chat-pane">
+        <div class="chat-pane-header">💬 Timetable Assistant</div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg system-note">
+                G'day! I'm your AI timetable assistant. Tell me your classes and I'll build your semester schedule — try one of the suggestions below.
             </div>
-            
-            <div class="timer-panel">
-                <div class="panel-title">⏰ Active Timers</div>
-                <div class="active-timers" id="activeTimers">
-                    <div class="empty-timers">No active timers. Use the chat above to set some timers!</div>
-                </div>
+        </div>
+
+        <div class="starters">
+            <div class="starters-label">Try asking:</div>
+            <div class="chips" id="chips">
+                <span class="chip" onclick="sendChip(this)">Add COMP1010 lecture Monday 10–12 in Copland Theatre</span>
+                <span class="chip" onclick="sendChip(this)">Add MATH1001 tutorial Wednesday 2pm–3pm in HN Building room 1.58</span>
+                <span class="chip" onclick="sendChip(this)">Add BIOL2020 lab Thursday 1pm–4pm in Biology Teaching Lab</span>
+                <span class="chip" onclick="sendChip(this)">Add COMP1010 tutorial Friday 9am–10am in CSIT N115</span>
+                <span class="chip" onclick="sendChip(this)">Do I have any clashes?</span>
+                <span class="chip" onclick="sendChip(this)">What's free on Wednesday?</span>
+                <span class="chip" onclick="sendChip(this)">Show me all my classes</span>
+                <span class="chip" onclick="sendChip(this)">Remove my BIOL2020 lab</span>
             </div>
+        </div>
+
+        <div class="chat-input-row">
+            <textarea class="chat-input" id="chatInput" placeholder="Ask me to manage your timetable…" rows="1"></textarea>
+            <button class="send-btn" id="sendBtn" disabled title="Send (Enter)">➤</button>
         </div>
     </div>
 
-    <script type="module">
-        // Import Google GenAI using ESM
-        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
+    <!-- ── Timetable ──────────────────────────────────────────────── -->
+    <div class="tt-pane">
+        <div class="tt-pane-header">
+            <div>
+                <div class="tt-title">📅 Weekly Timetable</div>
+                <div class="tt-sub">Semester 1, 2026 · Australian National University</div>
+            </div>
+            <div class="tt-count" id="classCount">0 classes</div>
+        </div>
 
-        let apiKey = localStorage.getItem('googleAiApiKey') || '';
-        let ai = null;
-        let timers = [];
-        let timerIdCounter = 1;
+        <div class="tt-scroll">
+            <div id="ttContainer"></div>
+        </div>
 
-        // Initialize elements
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const apiStatus = document.getElementById('apiStatus');
-        const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const activeTimers = document.getElementById('activeTimers');
+        <div class="legend">
+            <span class="legend-lbl">Type:</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#93c5fd"></span>Lecture</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#6ee7b7"></span>Tutorial</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#fcd34d"></span>Lab</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#c4b5fd"></span>Workshop</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f9a8d4"></span>Seminar</span>
+        </div>
+    </div>
 
-        // Load saved API key
-        if (apiKey) {
-            apiKeyInput.value = apiKey;
-            initializeAI();
-        }
+</div><!-- .main -->
 
-        function initializeAI() {
-            try {
-                ai = new GoogleGenAI({ apiKey: apiKey });
-                apiStatus.textContent = '✅ API key saved and ready!';
-                apiStatus.className = 'api-status success';
-                sendBtn.disabled = false;
-            } catch (error) {
-                apiStatus.textContent = '❌ Invalid API key';
-                apiStatus.className = 'api-status';
-                sendBtn.disabled = true;
-            }
-        }
+<script type="module">
+import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
 
-        saveApiKeyBtn.addEventListener('click', () => {
-            apiKey = apiKeyInput.value.trim();
-            if (apiKey) {
-                localStorage.setItem('googleAiApiKey', apiKey);
-                initializeAI();
-            } else {
-                apiStatus.textContent = 'Please enter a valid API key';
-                apiStatus.className = 'api-status';
-            }
-        });
+// ─── State ────────────────────────────────────────────────────────────────────
+let ai = null;
+let conversationHistory = [];
+let timetableClasses = [];
 
-        // Chat functionality
-        sendBtn.addEventListener('click', () => {
-            const message = chatInput.value.trim();
-            if (message) {
-                sendMessage(message);
-                chatInput.value = '';
-            }
-        });
+// ─── Constants ────────────────────────────────────────────────────────────────
+const GRID_START = 8;   // 8:00 AM
+const GRID_END   = 20;  // 8:00 PM
+const PX_PER_HR  = 60;
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const DAY_SHORT = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri' };
 
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                const message = chatInput.value.trim();
-                if (message) {
-                    sendMessage(message);
-                    chatInput.value = '';
-                }
-            }
-        });
+const CLASS_COLORS = {
+    'Lecture':  { bg: '#dbeafe', text: '#1e3a8a', border: '#93c5fd' },
+    'Tutorial': { bg: '#d1fae5', text: '#064e3b', border: '#6ee7b7' },
+    'Lab':      { bg: '#fef3c7', text: '#78350f', border: '#fcd34d' },
+    'Workshop': { bg: '#ede9fe', text: '#3b0764', border: '#c4b5fd' },
+    'Seminar':  { bg: '#fce7f3', text: '#831843', border: '#f9a8d4' },
+};
 
-        // Auto-resize textarea
-        chatInput.addEventListener('input', () => {
-            chatInput.style.height = 'auto';
-            chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
-        });
+const SYSTEM_PROMPT = `You are UniSched, a friendly and knowledgeable AI timetable assistant for Australian university students.
 
-        function sendMessage(message) {
-            if (!ai) {
-                alert('Please enter your Google AI API key first');
-                return;
-            }
+Help students manage their weekly class schedule using the available tools. Use Australian university terminology throughout — "unit" not "course", "fortnightly" not "biweekly", "tutor" not "TA", "practical" or "prac" for labs, "semester" not "quarter", etc.
 
-            // Add user message
-            addMessage('user', message);
-            
-            // Process command
-            processCommand(message);
-        }
+When the user wants to add a class, extract:
+- unit_code (e.g. COMP1010)
+- unit_name (the full name — if unknown, make a reasonable guess based on the code)
+- type (Lecture, Tutorial, Lab, Workshop, or Seminar — ask if unclear)
+- day (Monday–Friday)
+- start_time and end_time in HH:MM 24-hour format
+- location (if not mentioned, use "TBA")
 
-        function addMessage(type, content, functionCall = null) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            
-            if (functionCall) {
-                messageDiv.innerHTML = `
-                    ${content}
-                    <div class="function-call">
-                        <div class="function-name">🔧 ${functionCall.name}</div>
-                        <div class="function-params">${JSON.stringify(functionCall.params, null, 2)}</div>
-                    </div>
-                `;
-            } else {
-                messageDiv.textContent = content;
-            }
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+Always confirm what you've done in a friendly tone. After adding several classes, offer to check for timetable clashes.`;
 
-        async function processCommand(command) {
-            try {
-                // Simulate function calling with AI
-                const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
-                    contents: [{
-                        text: `You are a kitchen timer assistant. Analyze this command and determine what timer function to call: "${command}". 
-                        
-                        Available functions:
-                        - setTimer(name, minutes): Set a new timer
-                        - listTimers(): Show all active timers  
-                        - addTime(timerName, additionalMinutes): Add time to existing timer
-                        - removeTimer(timerName): Remove a timer
-                        
-                        Respond with the function name and parameters, then a friendly message.`
-                    }],
+// ─── Function Declarations ────────────────────────────────────────────────────
+const FUNCTION_DECLARATIONS = [
+    {
+        name: 'add_class',
+        description: 'Add a class or session (lecture, tutorial, lab, workshop, or seminar) to the student timetable.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                unit_code:  { type: Type.STRING, description: 'The unit/subject code, e.g. COMP1010, MATH1001' },
+                unit_name:  { type: Type.STRING, description: 'Full name of the unit, e.g. Introduction to Programming' },
+                type:       { type: Type.STRING, description: 'Class type: Lecture, Tutorial, Lab, Workshop, or Seminar' },
+                day:        { type: Type.STRING, description: 'Day of the week: Monday, Tuesday, Wednesday, Thursday, or Friday' },
+                start_time: { type: Type.STRING, description: 'Start time in 24-hour HH:MM format, e.g. 10:00 or 14:00' },
+                end_time:   { type: Type.STRING, description: 'End time in 24-hour HH:MM format, e.g. 12:00 or 16:00' },
+                location:   { type: Type.STRING, description: 'Room, building, or campus location — use TBA if unknown' },
+            },
+            required: ['unit_code', 'unit_name', 'type', 'day', 'start_time', 'end_time', 'location'],
+        },
+    },
+    {
+        name: 'remove_class',
+        description: 'Remove a class from the timetable by unit code and optionally class type.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                unit_code: { type: Type.STRING, description: 'Unit code whose class(es) to remove, e.g. COMP1010' },
+                type:      { type: Type.STRING, description: 'Optional: specific class type to remove. If omitted, all classes for the unit are removed.' },
+            },
+            required: ['unit_code'],
+        },
+    },
+    {
+        name: 'list_classes',
+        description: 'Return all classes currently scheduled in the timetable.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {},
+        },
+    },
+    {
+        name: 'check_clashes',
+        description: 'Check the timetable for any scheduling conflicts where two or more classes overlap in time on the same day.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {},
+        },
+    },
+    {
+        name: 'get_free_periods',
+        description: 'Return the free (unscheduled) time slots on a given day between 8:00 and 20:00.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                day: { type: Type.STRING, description: 'Day of the week: Monday, Tuesday, Wednesday, Thursday, or Friday' },
+            },
+            required: ['day'],
+        },
+    },
+];
+
+// ─── Function Implementations ─────────────────────────────────────────────────
+function normaliseType(t) {
+    if (!t) return 'Lecture';
+    const map = { lecture: 'Lecture', tutorial: 'Tutorial', lab: 'Lab', prac: 'Lab', practical: 'Lab', workshop: 'Workshop', seminar: 'Seminar' };
+    return map[t.toLowerCase()] || (t.charAt(0).toUpperCase() + t.slice(1));
+}
+
+function addClassFn({ unit_code, unit_name, type, day, start_time, end_time, location }) {
+    const classType = normaliseType(type);
+    const entry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        unit_code: unit_code.toUpperCase(),
+        unit_name,
+        type: classType,
+        day,
+        start_time,
+        end_time,
+        location,
+    };
+    timetableClasses.push(entry);
+    renderTimetable();
+    return {
+        success: true,
+        message: `Added ${classType} for ${entry.unit_code} on ${day} ${start_time}–${end_time} at ${location}.`,
+    };
+}
+
+function removeClassFn({ unit_code, type }) {
+    const code = unit_code.toUpperCase();
+    const before = timetableClasses.length;
+    if (type) {
+        const classType = normaliseType(type);
+        timetableClasses = timetableClasses.filter(
+            c => !(c.unit_code === code && c.type === classType)
+        );
+    } else {
+        timetableClasses = timetableClasses.filter(c => c.unit_code !== code);
+    }
+    const removed = before - timetableClasses.length;
+    renderTimetable();
+    return removed > 0
+        ? { success: true,  message: `Removed ${removed} class${removed !== 1 ? 'es' : ''} for ${code}.` }
+        : { success: false, message: `No classes found for ${code}${type ? ' (' + type + ')' : ''}.` };
+}
+
+function listClassesFn() {
+    if (timetableClasses.length === 0) {
+        return { classes: [], message: 'No classes scheduled yet.' };
+    }
+    const dayOrder = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4 };
+    const sorted = [...timetableClasses].sort(
+        (a, b) => (dayOrder[a.day] - dayOrder[b.day]) || a.start_time.localeCompare(b.start_time)
+    );
+    return {
+        count: sorted.length,
+        classes: sorted.map(c => ({
+            unit_code: c.unit_code,
+            unit_name: c.unit_name,
+            type: c.type,
+            day: c.day,
+            start_time: c.start_time,
+            end_time: c.end_time,
+            location: c.location,
+        })),
+        message: `${sorted.length} class${sorted.length !== 1 ? 'es' : ''} scheduled.`,
+    };
+}
+
+function checkClashesFn() {
+    const clashes = [];
+    for (let i = 0; i < timetableClasses.length; i++) {
+        for (let j = i + 1; j < timetableClasses.length; j++) {
+            const a = timetableClasses[i];
+            const b = timetableClasses[j];
+            if (a.day !== b.day) continue;
+            const aStart = toMin(a.start_time), aEnd = toMin(a.end_time);
+            const bStart = toMin(b.start_time), bEnd = toMin(b.end_time);
+            if (aStart < bEnd && aEnd > bStart) {
+                clashes.push({
+                    day: a.day,
+                    class1: `${a.unit_code} ${a.type} (${a.start_time}–${a.end_time})`,
+                    class2: `${b.unit_code} ${b.type} (${b.start_time}–${b.end_time})`,
                 });
-
-                // Parse the AI response and simulate function execution
-                const aiResponse = response.text;
-                const functionCall = extractFunctionCall(command);
-                
-                if (functionCall) {
-                    const result = executeFunction(functionCall);
-                    addMessage('assistant', result.message, {
-                        name: functionCall.name,
-                        params: functionCall.params
-                    });
-                } else {
-                    addMessage('assistant', aiResponse);
-                }
-
-            } catch (error) {
-                console.error('Error processing command:', error);
-                addMessage('assistant', 'Sorry, I had trouble understanding that command. Try something like "Set a timer for 10 minutes for pasta"');
             }
         }
+    }
+    return {
+        hasClashes: clashes.length > 0,
+        clashCount: clashes.length,
+        clashes,
+        message: clashes.length === 0
+            ? 'No clashes detected — your timetable is conflict-free!'
+            : `Found ${clashes.length} clash${clashes.length !== 1 ? 'es' : ''}.`,
+    };
+}
 
-        function extractFunctionCall(command) {
-            const lowerCommand = command.toLowerCase();
-            
-            // Set timer pattern
-            const setTimerMatch = lowerCommand.match(/set.*timer.*?(\d+).*?minute.*?for.*?(.+?)(?:\.|$)/);
-            if (setTimerMatch) {
-                return {
-                    name: 'setTimer',
-                    params: {
-                        name: setTimerMatch[2].trim(),
-                        minutes: parseInt(setTimerMatch[1])
-                    }
-                };
-            }
+function getFreePeriodsFn({ day }) {
+    const dayClasses = timetableClasses
+        .filter(c => c.day === day)
+        .sort((a, b) => a.start_time.localeCompare(b.start_time));
 
-            // List timers pattern
-            if (lowerCommand.includes('what timer') || lowerCommand.includes('show timer') || lowerCommand.includes('list timer')) {
-                return {
-                    name: 'listTimers',
-                    params: {}
-                };
-            }
+    const WORK_START = '08:00';
+    const WORK_END   = '20:00';
 
-            // Add time pattern
-            const addTimeMatch = lowerCommand.match(/add.*?(\d+).*?minute.*?to.*?(.+?)(?:\.|$)/);
-            if (addTimeMatch) {
-                return {
-                    name: 'addTime',
-                    params: {
-                        timerName: addTimeMatch[2].trim(),
-                        additionalMinutes: parseInt(addTimeMatch[1])
-                    }
-                };
-            }
+    if (dayClasses.length === 0) {
+        return { day, freePeriods: [{ from: WORK_START, to: WORK_END }], message: `${day} is completely free from 8:00 to 20:00.` };
+    }
 
-            return null;
+    const free = [];
+    let cursor = WORK_START;
+    for (const cls of dayClasses) {
+        if (cursor < cls.start_time) free.push({ from: cursor, to: cls.start_time });
+        if (cls.end_time > cursor) cursor = cls.end_time;
+    }
+    if (cursor < WORK_END) free.push({ from: cursor, to: WORK_END });
+
+    return {
+        day,
+        freePeriods: free,
+        message: free.length === 0
+            ? `${day} is fully booked between 8:00 and 20:00.`
+            : `Free on ${day}: ${free.map(p => `${p.from}–${p.to}`).join(', ')}.`,
+    };
+}
+
+function runFunction(name, args) {
+    switch (name) {
+        case 'add_class':        return addClassFn(args);
+        case 'remove_class':     return removeClassFn(args);
+        case 'list_classes':     return listClassesFn();
+        case 'check_clashes':    return checkClashesFn();
+        case 'get_free_periods': return getFreePeriodsFn(args);
+        default: return { error: `Unknown function: ${name}` };
+    }
+}
+
+// ─── Timetable Grid ───────────────────────────────────────────────────────────
+function toMin(t) {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + (m || 0);
+}
+
+function buildGrid() {
+    const container = document.getElementById('ttContainer');
+    container.innerHTML = '';
+
+    const outer = document.createElement('div');
+    outer.className = 'tt-outer';
+
+    // Time column
+    const timeCol = document.createElement('div');
+    timeCol.className = 'time-col';
+    timeCol.appendChild(el('div', 'time-col-top'));
+    for (let h = GRID_START; h < GRID_END; h++) {
+        const lbl = el('div', 'time-label');
+        lbl.textContent = `${h}:00`;
+        timeCol.appendChild(lbl);
+    }
+    outer.appendChild(timeCol);
+
+    // Days
+    const daysRow = el('div', 'days-row');
+    DAYS.forEach(day => {
+        const col = el('div', 'day-col');
+        col.dataset.day = day;
+
+        const hdr = el('div', 'day-col-hdr');
+        hdr.textContent = window.innerWidth < 600 ? DAY_SHORT[day] : day;
+        col.appendChild(hdr);
+
+        const body = el('div', 'day-body');
+        for (let h = GRID_START; h < GRID_END; h++) {
+            const hLine = el('div', 'h-line');
+            hLine.style.top = `${(h - GRID_START) * PX_PER_HR}px`;
+            body.appendChild(hLine);
+
+            const halfLine = el('div', 'h-half');
+            halfLine.style.top = `${(h - GRID_START) * PX_PER_HR + PX_PER_HR / 2}px`;
+            body.appendChild(halfLine);
         }
+        col.appendChild(body);
+        daysRow.appendChild(col);
+    });
+    outer.appendChild(daysRow);
+    container.appendChild(outer);
+}
 
-        function executeFunction(functionCall) {
-            switch (functionCall.name) {
-                case 'setTimer':
-                    return setTimer(functionCall.params.name, functionCall.params.minutes);
-                case 'listTimers':
-                    return listTimers();
-                case 'addTime':
-                    return addTime(functionCall.params.timerName, functionCall.params.additionalMinutes);
-                case 'removeTimer':
-                    return removeTimer(functionCall.params.timerName);
-                default:
-                    return { message: "I don't recognize that function." };
-            }
+function renderTimetable() {
+    document.querySelectorAll('.class-card').forEach(n => n.remove());
+
+    const count = timetableClasses.length;
+    document.getElementById('classCount').textContent = `${count} class${count !== 1 ? 'es' : ''}`;
+
+    for (const cls of timetableClasses) {
+        const col = document.querySelector(`.day-col[data-day="${cls.day}"]`);
+        if (!col) continue;
+
+        const body = col.querySelector('.day-body');
+        const startMin = toMin(cls.start_time);
+        const endMin   = toMin(cls.end_time);
+
+        const top    = (startMin - GRID_START * 60) / 60 * PX_PER_HR;
+        const height = Math.max((endMin - startMin) / 60 * PX_PER_HR - 2, 16);
+
+        if (top < 0 || top >= (GRID_END - GRID_START) * PX_PER_HR) continue;
+
+        const colors = CLASS_COLORS[cls.type] || CLASS_COLORS['Lecture'];
+        const card = el('div', 'class-card');
+        card.style.top         = `${top}px`;
+        card.style.height      = `${height}px`;
+        card.style.background  = colors.bg;
+        card.style.color       = colors.text;
+        card.style.borderColor = colors.border;
+        card.title = `${cls.unit_name}\n${cls.type}\n${cls.start_time}–${cls.end_time}\n${cls.location}`;
+
+        const codeDiv = el('div', 'cc-code');
+        codeDiv.textContent = cls.unit_code;
+        card.appendChild(codeDiv);
+
+        if (height > 26) {
+            const typeDiv = el('div', 'cc-type');
+            typeDiv.textContent = cls.type;
+            card.appendChild(typeDiv);
         }
-
-        function setTimer(name, minutes) {
-            const timer = {
-                id: timerIdCounter++,
-                name: name,
-                originalMinutes: minutes,
-                remainingSeconds: minutes * 60,
-                startTime: Date.now()
-            };
-            
-            timers.push(timer);
-            updateTimerDisplay();
-            
-            return {
-                message: `✅ Timer set! "${name}" for ${minutes} minutes.`
-            };
+        if (height > 44) {
+            const locDiv = el('div', 'cc-loc');
+            locDiv.textContent = cls.location;
+            card.appendChild(locDiv);
         }
+        body.appendChild(card);
+    }
+}
 
-        function listTimers() {
-            if (timers.length === 0) {
-                return { message: "No active timers right now." };
-            }
-            
-            const timerList = timers.map(timer => {
-                const remainingMinutes = Math.ceil(timer.remainingSeconds / 60);
-                return `• ${timer.name}: ${remainingMinutes} minutes remaining`;
-            }).join('\n');
-            
-            return {
-                message: `Active timers:\n${timerList}`
-            };
-        }
+function el(tag, cls) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    return e;
+}
 
-        function addTime(timerName, additionalMinutes) {
-            const timer = timers.find(t => t.name.toLowerCase().includes(timerName.toLowerCase()));
-            
-            if (!timer) {
-                return { message: `❌ Couldn't find a timer for "${timerName}". Try being more specific.` };
-            }
-            
-            timer.remainingSeconds += additionalMinutes * 60;
-            updateTimerDisplay();
-            
-            return {
-                message: `✅ Added ${additionalMinutes} minutes to "${timer.name}" timer.`
-            };
-        }
+// ─── Chat UI ──────────────────────────────────────────────────────────────────
+const msgList = document.getElementById('chatMessages');
 
-        function removeTimer(timerName) {
-            const timerIndex = timers.findIndex(t => t.name.toLowerCase().includes(timerName.toLowerCase()));
-            
-            if (timerIndex === -1) {
-                return { message: `❌ Couldn't find a timer for "${timerName}".` };
-            }
-            
-            const removedTimer = timers.splice(timerIndex, 1)[0];
-            updateTimerDisplay();
-            
-            return {
-                message: `✅ Removed "${removedTimer.name}" timer.`
-            };
-        }
+function addMsg(role, text) {
+    const d = el('div', `msg ${role}`);
+    d.textContent = text;
+    msgList.appendChild(d);
+    msgList.scrollTop = msgList.scrollHeight;
+    return d;
+}
 
-        function updateTimerDisplay() {
-            if (timers.length === 0) {
-                activeTimers.innerHTML = '<div class="empty-timers">No active timers. Use the chat above to set some timers!</div>';
-                return;
-            }
+function addFnIndicator(name, args, result) {
+    const d = el('div', 'fn-indicator');
+    const argsStr = Object.entries(args || {})
+        .map(([k, v]) => `${k}: ${v}`)
+        .join('\n');
+    d.innerHTML = `
+        <div class="fn-name">⚙️ ${name}()</div>
+        ${argsStr ? `<div class="fn-args">${argsStr}</div>` : ''}
+        <div class="fn-result">${result.message || JSON.stringify(result)}</div>
+    `;
+    msgList.appendChild(d);
+    msgList.scrollTop = msgList.scrollHeight;
+}
 
-            activeTimers.innerHTML = timers.map(timer => {
-                const remainingMinutes = Math.ceil(timer.remainingSeconds / 60);
-                const timeDisplay = remainingMinutes > 1 ? `${remainingMinutes} min` : `${timer.remainingSeconds} sec`;
-                
-                return `
-                    <div class="timer-item">
-                        <div class="timer-info">
-                            <div class="timer-name">${timer.name}</div>
-                            <div class="timer-time">${timeDisplay}</div>
-                        </div>
-                        <div class="timer-controls">
-                            <button class="timer-btn" onclick="pauseTimer(${timer.id})">⏸️</button>
-                            <button class="timer-btn" onclick="removeTimerById(${timer.id})">❌</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+function showTyping() {
+    const d = el('div', 'typing');
+    d.id = 'typing';
+    d.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    msgList.appendChild(d);
+    msgList.scrollTop = msgList.scrollHeight;
+}
 
-        // Global functions for timer controls
-        window.sendCommand = (command) => {
-            chatInput.value = command;
-            sendMessage(command);
+function hideTyping() { document.getElementById('typing')?.remove(); }
+
+// ─── Gemini API — multi-turn function calling loop ────────────────────────────
+async function sendToAI(userText) {
+    const btn   = document.getElementById('sendBtn');
+    const input = document.getElementById('chatInput');
+    btn.disabled   = true;
+    input.disabled = true;
+
+    addMsg('user', userText);
+    showTyping();
+
+    try {
+        conversationHistory.push({ role: 'user', parts: [{ text: userText }] });
+
+        const callConfig = {
+            systemInstruction: SYSTEM_PROMPT,
+            tools: [{ functionDeclarations: FUNCTION_DECLARATIONS }],
         };
 
-        window.pauseTimer = (timerId) => {
-            addMessage('system', `Timer ${timerId} paused (simulation)`);
-        };
+        let response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: conversationHistory,
+            config: callConfig,
+        });
 
-        window.removeTimerById = (timerId) => {
-            const timerIndex = timers.findIndex(t => t.id === timerId);
-            if (timerIndex !== -1) {
-                const removedTimer = timers.splice(timerIndex, 1)[0];
-                updateTimerDisplay();
-                addMessage('system', `Removed "${removedTimer.name}" timer`);
+        // Handle chained function calls
+        while (response.functionCalls && response.functionCalls.length > 0) {
+            // Record the model turn (which contains the function call parts)
+            conversationHistory.push(response.candidates[0].content);
+
+            hideTyping();
+
+            // Execute each function and collect responses
+            const fnResponseParts = [];
+            for (const fc of response.functionCalls) {
+                const result = runFunction(fc.name, fc.args || {});
+                addFnIndicator(fc.name, fc.args || {}, result);
+                fnResponseParts.push({
+                    functionResponse: {
+                        name: fc.name,
+                        response: result,
+                    },
+                });
             }
-        };
 
-        // Simulate timer countdown (for demo purposes)
-        setInterval(() => {
-            timers.forEach(timer => {
-                if (timer.remainingSeconds > 0) {
-                    timer.remainingSeconds -= 1;
-                }
+            // Return function results to the model
+            conversationHistory.push({ role: 'user', parts: fnResponseParts });
+
+            showTyping();
+
+            response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: conversationHistory,
+                config: callConfig,
             });
-            
-            // Remove expired timers
-            const expiredTimers = timers.filter(t => t.remainingSeconds <= 0);
-            expiredTimers.forEach(timer => {
-                addMessage('system', `⏰ "${timer.name}" timer finished!`);
-            });
-            
-            timers = timers.filter(t => t.remainingSeconds > 0);
-            updateTimerDisplay();
-        }, 1000);
+        }
 
-        // Initialize
-        sendBtn.disabled = !apiKey;
-    </script>
+        hideTyping();
+
+        const finalText = response.text;
+        conversationHistory.push({ role: 'model', parts: [{ text: finalText }] });
+        addMsg('assistant', finalText);
+
+    } catch (err) {
+        hideTyping();
+        console.error(err);
+        addMsg('assistant', `Something went wrong: ${err.message}`);
+    } finally {
+        btn.disabled   = false;
+        input.disabled = false;
+        input.focus();
+    }
+}
+
+// ─── API key & init ───────────────────────────────────────────────────────────
+let apiKey = localStorage.getItem('googleAiApiKey') || '';
+
+function initAI() {
+    try {
+        ai = new GoogleGenAI({ apiKey });
+        const s = document.getElementById('apiStatus');
+        s.textContent  = '✅ Connected — ready to build your timetable';
+        s.className    = 'api-status ok';
+        document.getElementById('sendBtn').disabled = false;
+    } catch (e) {
+        document.getElementById('apiStatus').textContent = '❌ Invalid API key';
+        document.getElementById('apiStatus').className   = 'api-status err';
+    }
+}
+
+document.getElementById('saveApiKey').addEventListener('click', () => {
+    apiKey = document.getElementById('apiKeyInput').value.trim();
+    if (apiKey) {
+        localStorage.setItem('googleAiApiKey', apiKey);
+        initAI();
+    } else {
+        document.getElementById('apiStatus').textContent = 'Please enter a valid API key.';
+    }
+});
+
+// ─── Chat input ───────────────────────────────────────────────────────────────
+const chatInput = document.getElementById('chatInput');
+const sendBtn   = document.getElementById('sendBtn');
+
+function doSend() {
+    const msg = chatInput.value.trim();
+    if (!msg || !ai) return;
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    sendToAI(msg);
+}
+
+sendBtn.addEventListener('click', doSend);
+
+chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
+});
+
+chatInput.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+window.sendChip = function (el) {
+    chatInput.value = el.textContent.trim();
+    doSend();
+};
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+if (apiKey) {
+    document.getElementById('apiKeyInput').value = apiKey;
+    initAI();
+}
+
+buildGrid();
+renderTimetable();
+</script>
 </body>
 </html>
