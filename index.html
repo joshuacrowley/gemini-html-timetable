@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini API Cooking Demos</title>
+    <title>Gemini API — Australian Uni Timetable Demos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,621 +14,642 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 32px 20px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
         }
 
-        .header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        /* ── Hero ─────────────────────────────────────────────── */
+        .hero {
+            text-align: center;
             color: white;
-            padding: 40px;
-            text-align: center;
+            padding: 60px 20px 52px;
         }
 
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            font-weight: 300;
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.85);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
         }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
         }
 
-        .content-section {
-            padding: 40px;
+        .hero h1 span {
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .intro-text {
-            text-align: center;
-            color: #666;
+        .hero p {
             font-size: 1.1rem;
-            margin-bottom: 40px;
-            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.65);
+            max-width: 600px;
+            margin: 0 auto 36px;
+            line-height: 1.7;
         }
 
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            color: #0f172a;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #f1f5f9;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ── Grid ─────────────────────────────────────────────── */
         .demos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
         }
 
+        /* ── Card ─────────────────────────────────────────────── */
         .demo-card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            transition: all 0.3s ease;
-            border: 1px solid #e1e1e1;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+        }
+
+        .card-header {
+            padding: 24px 24px 20px;
             position: relative;
             overflow: hidden;
         }
 
-        .demo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .demo-card::before {
+        .card-header::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--accent-color);
+            top: -30px;
+            right: -30px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .demo-card.text-gen { --accent-color: #FF6B6B; }
-        .demo-card.image-gen { --accent-color: #4ECDC4; }
-        .demo-card.speech-gen { --accent-color: #FFA726; }
-        .demo-card.long-context { --accent-color: #8E44AD; }
-        .demo-card.structured { --accent-color: #2ECC71; }
-        .demo-card.thinking { --accent-color: #E74C3C; }
-        .demo-card.document { --accent-color: #3498DB; }
-        .demo-card.image-understanding { --accent-color: #16A085; }
-        .demo-card.video { --accent-color: #D63031; }
-        .demo-card.audio { --accent-color: #6C5CE7; }
-        .demo-card.function { --accent-color: #00B894; }
-        .demo-card.search { --accent-color: #E17055; }
-        .demo-card.code { --accent-color: #74B9FF; }
-        .demo-card.url { --accent-color: #FD79A8; }
-
-        .demo-header {
+        .card-meta {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
+            justify-content: space-between;
+            margin-bottom: 14px;
         }
 
-        .demo-icon {
-            font-size: 2rem;
-            width: 60px;
-            height: 60px;
+        .card-number {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+
+        .card-title {
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+
+        .card-capability {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .card-body {
+            padding: 20px 24px 24px;
+            flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            flex-direction: column;
         }
 
-        .demo-info {
+        .card-description {
+            color: #475569;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
             flex: 1;
         }
 
-        .demo-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .demo-number {
-            background: var(--accent-color);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .demo-subtitle {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .demo-description {
-            color: #555;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .demo-features {
+        .card-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 6px;
+            margin-bottom: 18px;
         }
 
-        .feature-tag {
-            background: #e8f5e8;
-            color: #2d5016;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
+        .tag {
+            font-size: 0.72rem;
             font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: var(--tag-bg);
+            color: var(--tag-color);
         }
 
-        .demo-link {
+        .card-cta {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: var(--accent-color);
-            color: white;
+            gap: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--accent);
             text-decoration: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            transition: gap 0.2s;
         }
 
-        .demo-link:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        .demo-card:hover .card-cta {
+            gap: 10px;
         }
 
+        .paid-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* ── Per-card color themes ─────────────────────────────── */
+        .c-indigo  { background: linear-gradient(135deg, #4338ca, #6366f1); --accent: #6366f1; --tag-bg: #eef2ff; --tag-color: #3730a3; }
+        .c-pink    { background: linear-gradient(135deg, #be185d, #ec4899); --accent: #db2777; --tag-bg: #fdf2f8; --tag-color: #9d174d; }
+        .c-amber   { background: linear-gradient(135deg, #b45309, #f59e0b); --accent: #d97706; --tag-bg: #fffbeb; --tag-color: #78350f; }
+        .c-violet  { background: linear-gradient(135deg, #6d28d9, #8b5cf6); --accent: #7c3aed; --tag-bg: #f5f3ff; --tag-color: #4c1d95; }
+        .c-emerald { background: linear-gradient(135deg, #047857, #10b981); --accent: #059669; --tag-bg: #ecfdf5; --tag-color: #064e3b; }
+        .c-red     { background: linear-gradient(135deg, #b91c1c, #ef4444); --accent: #dc2626; --tag-bg: #fef2f2; --tag-color: #7f1d1d; }
+        .c-sky     { background: linear-gradient(135deg, #0369a1, #0ea5e9); --accent: #0284c7; --tag-bg: #f0f9ff; --tag-color: #0c4a6e; }
+        .c-teal    { background: linear-gradient(135deg, #0f766e, #14b8a6); --accent: #0d9488; --tag-bg: #f0fdfa; --tag-color: #134e4a; }
+        .c-orange  { background: linear-gradient(135deg, #c2410c, #f97316); --accent: #ea580c; --tag-bg: #fff7ed; --tag-color: #7c2d12; }
+        .c-purple  { background: linear-gradient(135deg, #7e22ce, #a855f7); --accent: #9333ea; --tag-bg: #faf5ff; --tag-color: #581c87; }
+        .c-green   { background: linear-gradient(135deg, #15803d, #22c55e); --accent: #16a34a; --tag-bg: #f0fdf4; --tag-color: #14532d; }
+        .c-blue    { background: linear-gradient(135deg, #1d4ed8, #3b82f6); --accent: #2563eb; --tag-bg: #eff6ff; --tag-color: #1e3a8a; }
+        .c-cyan    { background: linear-gradient(135deg, #0e7490, #06b6d4); --accent: #0891b2; --tag-bg: #ecfeff; --tag-color: #164e63; }
+        .c-rose    { background: linear-gradient(135deg, #9f1239, #e11d48); --accent: #be123c; --tag-bg: #fff1f2; --tag-color: #881337; }
+
+        /* ── Footer ───────────────────────────────────────────── */
         .footer {
-            background: #f8f9fa;
-            padding: 30px 40px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 40px;
             text-align: center;
-            border-top: 1px solid #e1e1e1;
-        }
-
-        .footer-content {
-            max-width: 800px;
-            margin: 0 auto;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
         }
 
         .footer h3 {
-            color: #333;
-            margin-bottom: 15px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
         }
 
         .footer p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 20px;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            max-width: 560px;
+            margin: 0 auto 24px;
         }
 
-        .quick-links {
+        .footer-links {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 16px;
             flex-wrap: wrap;
         }
 
-        .quick-link {
-            color: #4CAF50;
+        .footer-link {
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
+            font-size: 0.875rem;
             font-weight: 500;
             padding: 8px 16px;
-            border-radius: 6px;
-            transition: background-color 0.3s ease;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all 0.2s;
         }
 
-        .quick-link:hover {
-            background: #e8f5e8;
+        .footer-link:hover {
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.06);
         }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2.2rem;
-            }
-            
-            .demos-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .content-section {
-                padding: 20px;
-            }
-
-            .quick-links {
-                flex-direction: column;
-                align-items: center;
-            }
+        @media (max-width: 640px) {
+            .demos-grid { grid-template-columns: 1fr; }
+            .hero { padding: 40px 0 36px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🍳 Gemini API Cooking Demos</h1>
-            <p>Explore the power of Google's Gemini API through interactive cooking-themed prototypes. Each demo showcases different AI capabilities with delicious examples.</p>
+
+        <div class="hero">
+            <div class="hero-badge">✦ Gemini API · 14 Demos</div>
+            <h1>Build a smarter<br><span>uni timetable with AI</span></h1>
+            <p>A collection of standalone HTML demos showing how each Gemini SDK capability can power a feature in an Australian university timetable app. Open any file in your browser — no build tools required.</p>
+            <div class="hero-actions">
+                <a href="https://aistudio.google.com/api-keys" target="_blank" class="btn-primary">Get a free API key →</a>
+                <a href="https://ai.google.dev/gemini-api/docs" target="_blank" class="btn-secondary">Gemini API docs</a>
+            </div>
         </div>
-        
-        <div class="content-section">
-            <div class="intro-text">
-                <p>Welcome to the Gemini API Cookbook! 🧑‍🍳 These interactive prototypes demonstrate various AI capabilities through cooking-themed tasks. Click on any demo below to explore how Gemini can transform your culinary adventures.</p>
-            </div>
 
-            <div class="demos-grid">
-                <div class="demo-card text-gen">
-                    <div class="demo-header">
-                        <div class="demo-icon">📝</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">1</span>
-                                Recipe Writing Assistant
-                            </div>
-                            <div class="demo-subtitle">Text Generation</div>
-                        </div>
-                    </div>
-                    <div class="demo-description">
-                        Create imaginative and sophisticated recipes with AI. Generate gourmet "Invisible Soup" recipes with adjustable creativity levels.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Temperature Control</span>
-                        <span class="feature-tag">System Instructions</span>
-                        <span class="feature-tag">Creative Writing</span>
-                    </div>
-                    <a href="01-text-generation.html" class="demo-link">
-                        Start Cooking 🍳
-                    </a>
-                </div>
+        <div class="demos-grid">
 
-                <div class="demo-card image-gen">
-                    <div class="demo-header">
-                        <div class="demo-icon">🍽️</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">2</span>
-                                AI Food Plating Assistant
-                            </div>
-                            <div class="demo-subtitle">Image Generation</div>
-                        </div>
+            <!-- 01 Text Generation -->
+            <a href="01-text-generation.html" class="demo-card">
+                <div class="card-header c-indigo">
+                    <div class="card-meta">
+                        <span class="card-number">01</span>
+                        <span class="card-icon">📅</span>
                     </div>
-                    <div class="demo-description">
-                        Transform an empty plate into a beautifully plated dish with AI. See before and after comparisons of your culinary creations.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Food Photography</span>
-                        <span class="feature-tag">Before/After</span>
-                        <span class="feature-tag">Professional Plating</span>
-                    </div>
-                    <a href="02-image-generation.html" class="demo-link">
-                        Plate Dishes 🍽️
-                    </a>
+                    <div class="card-title">Uni Study Planner</div>
+                    <div class="card-capability">Text Generation</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Chat with an AI study planner that understands Australian uni life — units, WAM, swotvac, HECS. Choose your assistant style and get a personalised weekly plan.</p>
+                    <div class="card-tags">
+                        <span class="tag">Temperature control</span>
+                        <span class="tag">System instructions</span>
+                        <span class="tag">WAM & swotvac</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card speech-gen">
-                    <div class="demo-header">
-                        <div class="demo-icon">🔊</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">3</span>
-                                Cooking Show Narrator
-                            </div>
-                            <div class="demo-subtitle">Speech Generation</div>
-                        </div>
+            <!-- 02 Image Generation -->
+            <a href="02-image-generation.html" class="demo-card">
+                <div class="card-header c-pink">
+                    <div class="card-meta">
+                        <span class="card-number">02</span>
+                        <span class="card-icon">🖼️</span>
                     </div>
-                    <div class="demo-description">
-                        Create dramatic audio for cooking competitions. Generate professional narrator voices with emphasis and timing.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Voice Styles</span>
-                        <span class="feature-tag">Speech Rate</span>
-                        <span class="feature-tag">Drama Effects</span>
-                    </div>
-                    <a href="03-speech-generation.html" class="demo-link">
-                        Record Audio 🎙️
-                    </a>
+                    <div class="card-title">Weekly Timetable Visualiser</div>
+                    <div class="card-capability">Image Generation <span class="paid-badge">Paid API</span></div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Describe your weekly schedule in plain text and Imagen generates a beautiful visual planner — minimal grid, colourful blocks, pastel aesthetic, or dark mode.</p>
+                    <div class="card-tags">
+                        <span class="tag">Imagen API</span>
+                        <span class="tag">Visual styles</span>
+                        <span class="tag">PNG download</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card long-context">
-                    <div class="demo-header">
-                        <div class="demo-icon">📚</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">4</span>
-                                Cookbook Analyst
-                            </div>
-                            <div class="demo-subtitle">Long Context Processing</div>
-                        </div>
+            <!-- 03 Speech -->
+            <a href="03-speech-generation.html" class="demo-card">
+                <div class="card-header c-amber">
+                    <div class="card-meta">
+                        <span class="card-number">03</span>
+                        <span class="card-icon">🔊</span>
                     </div>
-                    <div class="demo-description">
-                        Process long cookbook chapters to extract specific recipes. Analyze 200-page documents for desserts and ingredients.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">PDF Processing</span>
-                        <span class="feature-tag">Recipe Extraction</span>
-                        <span class="feature-tag">Large Documents</span>
-                    </div>
-                    <a href="04-long-context.html" class="demo-link">
-                        Analyze Books 📖
-                    </a>
+                    <div class="card-title">Timetable Announcer</div>
+                    <div class="card-capability">Speech Generation</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Generate spoken announcements for class reminders, schedule changes, and swotvac countdowns. Choose from five voices with a live waveform visualiser.</p>
+                    <div class="card-tags">
+                        <span class="tag">TTS voices</span>
+                        <span class="tag">Waveform display</span>
+                        <span class="tag">WAV download</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card structured">
-                    <div class="demo-header">
-                        <div class="demo-icon">📊</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">5</span>
-                                Restaurant Menu Database
-                            </div>
-                            <div class="demo-subtitle">Structured Output</div>
-                        </div>
+            <!-- 04 Long Context -->
+            <a href="04-long-context.html" class="demo-card">
+                <div class="card-header c-violet">
+                    <div class="card-meta">
+                        <span class="card-number">04</span>
+                        <span class="card-icon">📚</span>
                     </div>
-                    <div class="demo-description">
-                        Convert menu descriptions into structured JSON data. Transform text into organized database-ready formats.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">JSON Schema</span>
-                        <span class="feature-tag">Data Validation</span>
-                        <span class="feature-tag">Menu Parsing</span>
-                    </div>
-                    <a href="05-structured-output.html" class="demo-link">
-                        Structure Data 📋
-                    </a>
+                    <div class="card-title">University Handbook Analyser</div>
+                    <div class="card-capability">Long Context</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Upload a unit outline or course handbook PDF and ask questions — due dates, hurdle requirements, assessment weightings, late submission policies, and more.</p>
+                    <div class="card-tags">
+                        <span class="tag">PDF upload</span>
+                        <span class="tag">1M token context</span>
+                        <span class="tag">Token counter</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card thinking">
-                    <div class="demo-header">
-                        <div class="demo-icon">🧠</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">6</span>
-                                Kitchen Problem Solver
-                            </div>
-                            <div class="demo-subtitle">Thinking Mode</div>
-                        </div>
+            <!-- 05 Structured Output -->
+            <a href="05-structured-output.html" class="demo-card">
+                <div class="card-header c-emerald">
+                    <div class="card-meta">
+                        <span class="card-number">05</span>
+                        <span class="card-icon">📊</span>
                     </div>
-                    <div class="demo-description">
-                        Solve complex cooking puzzles with step-by-step reasoning. Watch AI think through cake baking optimization problems.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Step-by-Step</span>
-                        <span class="feature-tag">Math Problems</span>
-                        <span class="feature-tag">Reasoning</span>
-                    </div>
-                    <a href="06-thinking.html" class="demo-link">
-                        Solve Puzzles 🧮
-                    </a>
+                    <div class="card-title">Class Schedule Parser</div>
+                    <div class="card-capability">Structured Output</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Paste messy timetable text from your student portal and get back clean structured JSON — unit codes, types, days, times, and locations — plus a visual grid.</p>
+                    <div class="card-tags">
+                        <span class="tag">JSON schema</span>
+                        <span class="tag">Visual timetable grid</span>
+                        <span class="tag">Unit codes</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card document">
-                    <div class="demo-header">
-                        <div class="demo-icon">📄</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">7</span>
-                                Recipe Card Digitiser
-                            </div>
-                            <div class="demo-subtitle">Document Processing</div>
-                        </div>
+            <!-- 06 Thinking -->
+            <a href="06-thinking.html" class="demo-card">
+                <div class="card-header c-red">
+                    <div class="card-meta">
+                        <span class="card-number">06</span>
+                        <span class="card-icon">🧠</span>
                     </div>
-                    <div class="demo-description">
-                        Extract text from handwritten recipe cards. Digitize grandma's cursive writing and margin notes with AI.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Handwriting OCR</span>
-                        <span class="feature-tag">Image Upload</span>
-                        <span class="feature-tag">Text Structure</span>
-                    </div>
-                    <a href="07-document-processing.html" class="demo-link">
-                        Digitize Cards 📝
-                    </a>
+                    <div class="card-title">Timetable Clash Resolver</div>
+                    <div class="card-capability">Thinking Mode</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Describe your units, available time slots, and constraints (work shifts, travel time, preferences). The AI thinks step-by-step to find a clash-free timetable.</p>
+                    <div class="card-tags">
+                        <span class="tag">Extended reasoning</span>
+                        <span class="tag">Constraint solving</span>
+                        <span class="tag">Thinking budget</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card image-understanding">
-                    <div class="demo-header">
-                        <div class="demo-icon">🖼️</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">8</span>
-                                Fridge Inspector
-                            </div>
-                            <div class="demo-subtitle">Image Understanding</div>
-                        </div>
+            <!-- 07 Document Processing -->
+            <a href="07-document-processing.html" class="demo-card">
+                <div class="card-header c-sky">
+                    <div class="card-meta">
+                        <span class="card-number">07</span>
+                        <span class="card-icon">📷</span>
                     </div>
-                    <div class="demo-description">
-                        Analyze fridge contents and get meal suggestions. AI identifies ingredients and recommends recipes you can make.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Object Detection</span>
-                        <span class="feature-tag">Meal Planning</span>
-                        <span class="feature-tag">Photo Analysis</span>
-                    </div>
-                    <a href="08-image-understanding.html" class="demo-link">
-                        Inspect Fridge 🔍
-                    </a>
+                    <div class="card-title">Handwritten Timetable Digitiser</div>
+                    <div class="card-capability">Document Processing</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Photograph a handwritten or printed timetable — whiteboard, paper planner, sticky note — and extract it into a clean structured day-by-day schedule.</p>
+                    <div class="card-tags">
+                        <span class="tag">Handwriting OCR</span>
+                        <span class="tag">Image upload</span>
+                        <span class="tag">Structured output</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card video">
-                    <div class="demo-header">
-                        <div class="demo-icon">📹</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">9</span>
-                                Cooking Tutorial Analyser
-                            </div>
-                            <div class="demo-subtitle">Video Understanding</div>
-                        </div>
+            <!-- 08 Image Understanding -->
+            <a href="08-image-understanding.html" class="demo-card">
+                <div class="card-header c-teal">
+                    <div class="card-meta">
+                        <span class="card-number">08</span>
+                        <span class="card-icon">🗺️</span>
                     </div>
-                    <div class="demo-description">
-                        Extract step-by-step instructions from cooking videos. Generate timestamps and chapter markers automatically.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Video Processing</span>
-                        <span class="feature-tag">Timestamps</span>
-                        <span class="feature-tag">Step Detection</span>
-                    </div>
-                    <a href="09-video-understanding.html" class="demo-link">
-                        Analyze Videos 🎬
-                    </a>
+                    <div class="card-title">Campus Map & Room Finder</div>
+                    <div class="card-capability">Image Understanding</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Upload a campus map or building floor plan and ask questions — find your lecture theatre, get directions between buildings, or check room locations.</p>
+                    <div class="card-tags">
+                        <span class="tag">Image analysis</span>
+                        <span class="tag">Spatial reasoning</span>
+                        <span class="tag">Campus navigation</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card audio">
-                    <div class="demo-header">
-                        <div class="demo-icon">🎤</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">10</span>
-                                Kitchen Timer Interpreter
-                            </div>
-                            <div class="demo-subtitle">Audio Processing</div>
-                        </div>
+            <!-- 09 Video Understanding -->
+            <a href="09-video-understanding.html" class="demo-card">
+                <div class="card-header c-orange">
+                    <div class="card-meta">
+                        <span class="card-number">09</span>
+                        <span class="card-icon">🎬</span>
                     </div>
-                    <div class="demo-description">
-                        Transcribe cooking podcasts and extract timing information. Find all cooking durations mentioned in audio.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Audio Transcription</span>
-                        <span class="feature-tag">Time Extraction</span>
-                        <span class="feature-tag">Timeline Creation</span>
-                    </div>
-                    <a href="10-audio.html" class="demo-link">
-                        Process Audio 🎧
-                    </a>
+                    <div class="card-title">Lecture Recording Summariser</div>
+                    <div class="card-capability">Video Understanding</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Upload a lecture recording and get a timestamped summary, key concepts, assessment hints mentioned by the lecturer, and a 5-minute study guide.</p>
+                    <div class="card-tags">
+                        <span class="tag">Video upload</span>
+                        <span class="tag">Timestamps</span>
+                        <span class="tag">Study guide</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card function">
-                    <div class="demo-header">
-                        <div class="demo-icon">🔧</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">11</span>
-                                Smart Kitchen Assistant
-                            </div>
-                            <div class="demo-subtitle">Function Calling</div>
-                        </div>
+            <!-- 10 Audio -->
+            <a href="10-audio.html" class="demo-card">
+                <div class="card-header c-purple">
+                    <div class="card-meta">
+                        <span class="card-number">10</span>
+                        <span class="card-icon">🎧</span>
                     </div>
-                    <div class="demo-description">
-                        Control kitchen timers with natural language. Set, adjust, and manage multiple cooking timers through conversation.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Natural Language</span>
-                        <span class="feature-tag">Timer Control</span>
-                        <span class="feature-tag">Function Calls</span>
-                    </div>
-                    <a href="11-function-calling.html" class="demo-link">
-                        Chat Assistant 💬
-                    </a>
+                    <div class="card-title">Lecture Audio Transcriber</div>
+                    <div class="card-capability">Audio Processing</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Upload lecture audio to get a full transcript, extract any due dates and deadlines mentioned by the lecturer, and pull out key terms and definitions.</p>
+                    <div class="card-tags">
+                        <span class="tag">Audio transcription</span>
+                        <span class="tag">Deadline extraction</span>
+                        <span class="tag">Key terms</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card search">
-                    <div class="demo-header">
-                        <div class="demo-icon">🔍</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">12</span>
-                                Restaurant Fact Checker
-                            </div>
-                            <div class="demo-subtitle">Google Search Integration</div>
-                        </div>
+            <!-- 11 Function Calling -->
+            <a href="11-function-calling.html" class="demo-card">
+                <div class="card-header c-green">
+                    <div class="card-meta">
+                        <span class="card-number">11</span>
+                        <span class="card-icon">💬</span>
                     </div>
-                    <div class="demo-description">
-                        Verify restaurant claims with real-time search. Check Michelin stars, opening dates, and current pricing information.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Real-time Search</span>
-                        <span class="feature-tag">Fact Verification</span>
-                        <span class="feature-tag">Source Citations</span>
-                    </div>
-                    <a href="12-google-search.html" class="demo-link">
-                        Verify Facts ✅
-                    </a>
+                    <div class="card-title">Smart Timetable Assistant</div>
+                    <div class="card-capability">Function Calling</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Chat with an AI that controls a live timetable grid. Add or remove classes, check for clashes, and find free periods — all through natural language conversation.</p>
+                    <div class="card-tags">
+                        <span class="tag">Function calling loop</span>
+                        <span class="tag">Live grid UI</span>
+                        <span class="tag">Clash detection</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card code">
-                    <div class="demo-header">
-                        <div class="demo-icon">💻</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">13</span>
-                                Recipe Scaler Calculator
-                            </div>
-                            <div class="demo-subtitle">Code Execution</div>
-                        </div>
+            <!-- 12 Google Search -->
+            <a href="12-google-search.html" class="demo-card">
+                <div class="card-header c-blue">
+                    <div class="card-meta">
+                        <span class="card-number">12</span>
+                        <span class="card-icon">🔍</span>
                     </div>
-                    <div class="demo-description">
-                        Generate and execute code to scale recipe ingredients. Create functions that handle decimal values and proper rounding.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">Code Generation</span>
-                        <span class="feature-tag">Live Execution</span>
-                        <span class="feature-tag">Multiple Languages</span>
-                    </div>
-                    <a href="13-code-execution.html" class="demo-link">
-                        Code Recipes 🧑‍💻
-                    </a>
+                    <div class="card-title">Course Info Lookup</div>
+                    <div class="card-capability">Google Search Grounding</div>
                 </div>
+                <div class="card-body">
+                    <p class="card-description">Ask real-time questions about Australian uni courses — prerequisites, semester dates, WAM requirements for honours, special consideration policies — with source citations.</p>
+                    <div class="card-tags">
+                        <span class="tag">Real-time search</span>
+                        <span class="tag">Source citations</span>
+                        <span class="tag">AU universities</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
 
-                <div class="demo-card url">
-                    <div class="demo-header">
-                        <div class="demo-icon">🌐</div>
-                        <div class="demo-info">
-                            <div class="demo-title">
-                                <span class="demo-number">14</span>
-                                Recipe Blog Analyser
-                            </div>
-                            <div class="demo-subtitle">URL Context Processing</div>
-                        </div>
+            <!-- 13 Code Execution -->
+            <a href="13-code-execution.html" class="demo-card">
+                <div class="card-header c-cyan">
+                    <div class="card-meta">
+                        <span class="card-number">13</span>
+                        <span class="card-icon">💻</span>
                     </div>
-                    <div class="demo-description">
-                        Extract and compare recipes from food blog URLs. Analyze baking times, temperatures, and ingredient differences.
-                    </div>
-                    <div class="demo-features">
-                        <span class="feature-tag">URL Processing</span>
-                        <span class="feature-tag">Recipe Extraction</span>
-                        <span class="feature-tag">Comparison Analysis</span>
-                    </div>
-                    <a href="14-url-context.html" class="demo-link">
-                        Analyze Blogs 📰
-                    </a>
+                    <div class="card-title">Study Load & WAM Calculator</div>
+                    <div class="card-capability">Code Execution</div>
                 </div>
-            </div>
+                <div class="card-body">
+                    <p class="card-description">Gemini writes and runs Python to calculate your WAM impact, grade needed to pass or get an HD, weekly study load, and swotvac revision allocation.</p>
+                    <div class="card-tags">
+                        <span class="tag">Live code execution</span>
+                        <span class="tag">WAM calculations</span>
+                        <span class="tag">HD/D/C/P/F scale</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
+
+            <!-- 14 URL Context -->
+            <a href="14-url-context.html" class="demo-card">
+                <div class="card-header c-rose">
+                    <div class="card-meta">
+                        <span class="card-number">14</span>
+                        <span class="card-icon">🌐</span>
+                    </div>
+                    <div class="card-title">Course Page Analyser</div>
+                    <div class="card-capability">URL Context</div>
+                </div>
+                <div class="card-body">
+                    <p class="card-description">Paste a university handbook URL and extract prerequisites, assessments, contact hours, and semester details — or compare two units side by side.</p>
+                    <div class="card-tags">
+                        <span class="tag">URL context tool</span>
+                        <span class="tag">Unit comparison</span>
+                        <span class="tag">AU handbook URLs</span>
+                    </div>
+                    <span class="card-cta">Open demo →</span>
+                </div>
+            </a>
+
         </div>
 
         <div class="footer">
-            <div class="footer-content">
-                <h3>🚀 Getting Started</h3>
-                <p>Each demo requires a Google AI API key to function. You can obtain one from the <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>. Your API key is stored locally in your browser and never sent to any third parties.</p>
-                
-                <div class="quick-links">
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="quick-link">Get API Key</a>
-                    <a href="https://ai.google.dev/gemini-api/docs" target="_blank" class="quick-link">API Documentation</a>
-                    <a href="cooking-themed-tasks.md" class="quick-link">Task Instructions</a>
-                    <a href="gemini-api-code-snippets.md" class="quick-link">Code Examples</a>
-                </div>
+            <h3>Getting started</h3>
+            <p>Every demo needs a Google AI API key — get one free from <a href="https://aistudio.google.com/api-keys" target="_blank" style="color:rgba(255,255,255,0.85);">Google AI Studio</a>. Your key is stored in <code style="font-size:0.8em;opacity:0.7;">localStorage</code> and never leaves your browser. Demo 2 (Image Generation) requires a paid API plan.</p>
+            <div class="footer-links">
+                <a href="https://aistudio.google.com/api-keys" target="_blank" class="footer-link">Get API Key</a>
+                <a href="https://ai.google.dev/gemini-api/docs" target="_blank" class="footer-link">API Docs</a>
+                <a href="https://ai.google.dev/api" target="_blank" class="footer-link">API Reference</a>
+                <a href="https://github.com/joshuacrowley/gemini-html-timetable" target="_blank" class="footer-link">GitHub</a>
             </div>
         </div>
+
     </div>
 </body>
 </html>
