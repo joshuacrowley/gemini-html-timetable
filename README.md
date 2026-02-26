@@ -1,170 +1,215 @@
-# Gemini API Timetable Demos
+# Gemini API — Australian Uni Timetable Demos
 
-A collection of interactive HTML demos showcasing Google's Gemini API capabilities through university timetable examples. Each demo is a standalone HTML file that runs directly in your browser — no build tools or server required.
+A collection of 14 standalone HTML demos showing how each Google Gemini SDK capability can power a feature in an Australian university timetable app. Open any file directly in your browser — no build tools, no server, no install required.
 
-The goal of this collection is to help students and developers build a smart university timetable app. Each file demonstrates a specific Gemini SDK feature and shows how it could power a real timetable feature — from scheduling assistant chat to extracting class times from a PDF handbook.
+Built for students and developers at Australian universities. Every demo uses local terminology: units (not courses), tutes, WAM, swotvac, HD/D/C/P/F grades, HECS, and real Australian uni contexts.
 
-## Quick Start
+**[Get a free API key →](https://aistudio.google.com/api-keys)**
 
-1. **Get a free API key** from Google AI Studio: https://aistudio.google.com/api-keys
-2. **Clone or download** this repository
-3. **Drag and drop** any HTML file into your browser
-4. **Enter your API key** when prompted (stored locally in your browser)
-5. **Start exploring!**
+---
 
 ## Demo Catalog
 
-### 1. Text Generation (`01-text-generation.html`)
-**Timetable Chat Assistant**
-Generate responses to timetable questions like "What should I study on Tuesday afternoon?" using adjustable creativity and system instructions.
-- Temperature control
-- System instructions
-- Conversational responses
+| # | Demo | Capability | Color |
+|---|---|---|---|
+| 01 | [Uni Study Planner](#01-uni-study-planner) | Text Generation | Indigo |
+| 02 | [Weekly Timetable Visualiser](#02-weekly-timetable-visualiser) | Image Generation *(paid)* | Pink |
+| 03 | [Timetable Announcer](#03-timetable-announcer) | Speech Generation | Amber |
+| 04 | [University Handbook Analyser](#04-university-handbook-analyser) | Long Context | Violet |
+| 05 | [Class Schedule Parser](#05-class-schedule-parser) | Structured Output | Emerald |
+| 06 | [Timetable Clash Resolver](#06-timetable-clash-resolver) | Thinking Mode | Red |
+| 07 | [Handwritten Timetable Digitiser](#07-handwritten-timetable-digitiser) | Document Processing | Sky Blue |
+| 08 | [Campus Map & Room Finder](#08-campus-map--room-finder) | Image Understanding | Teal |
+| 09 | [Lecture Recording Summariser](#09-lecture-recording-summariser) | Video Understanding | Orange |
+| 10 | [Lecture Audio Transcriber](#10-lecture-audio-transcriber) | Audio Processing | Purple |
+| 11 | [Smart Timetable Assistant](#11-smart-timetable-assistant) | Function Calling | Green |
+| 12 | [Course Info Lookup](#12-course-info-lookup) | Google Search Grounding | Blue |
+| 13 | [Study Load & WAM Calculator](#13-study-load--wam-calculator) | Code Execution | Cyan |
+| 14 | [Course Page Analyser](#14-course-page-analyser) | URL Context | Rose |
 
-### 2. Image Generation (`02-image-generation.html`)
-**Weekly Schedule Visualiser**
-Generate a visual weekly timetable image from a text description of your subjects and preferred study times.
-- Schedule visualisation
-- Before/after comparisons
-- Custom layouts
+---
 
-> **Note:** This demo uses Imagen and requires a **paid API token**.
+### 01 Uni Study Planner
 
-### 3. Speech Generation (`03-speech-generation.html`)
-**Timetable Announcer**
-Generate audio announcements for class reminders, schedule changes, and daily briefings in different voice styles.
-- Multiple voice styles
-- Adjustable speech rate
-- Reminder audio
+![01 card](cards/01-card.png)
 
-### 4. Long Context Processing (`04-long-context.html`)
-**University Handbook Analyser**
-Upload a long PDF course handbook and extract specific class times, room numbers, and assessment dates.
-- PDF processing
-- Schedule extraction
-- Large document handling
+Chat with an AI study planner that understands Australian uni life — units, WAM, swotvac, HECS. Pick from five assistant styles (Structured Planner, Motivational Coach, Exam-Focused Tutor, Flexible Advisor, Pomodoro Specialist) and adjust the temperature slider for strict plans or creative suggestions.
 
-### 5. Structured Output (`05-structured-output.html`)
-**Class Schedule Parser**
-Convert a plain-text course description into structured JSON — perfect for populating a timetable database.
-- JSON schema validation
-- Data structuring
-- Schedule parsing
+**Key concepts:** `systemInstruction`, `temperature`, `generationConfig`
 
-### 6. Thinking Mode (`06-thinking.html`)
-**Clash Resolver**
-Solve complex scheduling problems — like fitting all required subjects into a week without clashes — with step-by-step reasoning.
-- Step-by-step reasoning
-- Constraint solving
-- Logical deduction
+---
 
-### 7. Document Processing (`07-document-processing.html`)
-**Handwritten Notes Digitiser**
-Extract text from photos of handwritten timetables, sticky notes, or whiteboard schedules.
-- Handwriting OCR
-- Image upload support
-- Text structure preservation
+### 02 Weekly Timetable Visualiser
 
-### 8. Image Understanding (`08-image-understanding.html`)
-**Timetable Photo Reader**
-Photograph a printed or handwritten timetable and have Gemini read and summarise the schedule for you.
-- Image analysis
-- Schedule reading
-- Photo input
+![02 card](cards/02-card.png)
 
-### 9. Video Understanding (`09-video-understanding.html`)
-**Lecture Recording Summariser**
-Extract key topics, timestamps, and action items from a lecture recording to help plan study sessions.
-- Video processing
-- Timestamp generation
-- Topic detection
+Describe your weekly schedule in plain text and Imagen generates a beautiful visual planner image. Choose from four visual styles: clean minimal grid, colourful blocks, pastel aesthetic, or dark mode planner.
 
-### 10. Audio Processing (`10-audio.html`)
-**Lecture Audio Transcriber**
-Transcribe a lecture audio clip and extract mentioned dates, deadlines, and assignment details.
-- Audio transcription
-- Date/deadline extraction
-- Timeline creation
+> **Requires a paid API token** — uses the Imagen API (`imagen-4.0-generate-001`).
 
-### 11. Function Calling (`11-function-calling.html`)
-**Smart Timetable Assistant**
-Control a timetable with natural language — add, move, or remove classes through conversation using function calls.
-- Natural language control
-- Calendar functions
-- Conversational UI
+**Key concepts:** `ai.models.generateImages`, `numberOfImages`, image bytes decoding
 
-### 12. Google Search Integration (`12-google-search.html`)
-**Course Info Lookup**
-Look up real-time information about courses, prerequisites, or university policies using grounded search results.
-- Real-time search
-- Fact verification
-- Source citations
+---
 
-### 13. Code Execution (`13-code-execution.html`)
-**Study Hours Calculator**
-Generate and run code to calculate weekly study load, free periods, and optimal revision windows from a timetable.
-- Code generation
-- Live execution
-- Schedule calculations
+### 03 Timetable Announcer
 
-### 14. URL Context Processing (`14-url-context.html`)
-**Course Page Analyser**
-Paste a university course page URL and extract the schedule, assessment dates, and contact information automatically.
-- URL processing
-- Schedule extraction
-- Data comparison
+![03 card](cards/03-card.png)
 
-## How to Use
+Generate spoken audio announcements for class reminders, schedule changes, and swotvac countdowns. Five voice options with a live waveform visualiser and WAV download.
 
-Open `index.html` in your browser for an overview of all demos, or open any individual file directly:
+**Key concepts:** `responseModalities: ['AUDIO']`, PCM-to-WAV conversion, Web Audio API
+
+---
+
+### 04 University Handbook Analyser
+
+![04 card](cards/04-card.png)
+
+Upload a unit outline or course handbook PDF (or paste a URL) and ask questions about it — due dates, hurdle requirements, assessment weightings, late submission policies. A token count panel shows how much of Gemini's 1M context window you're using.
+
+**Key concepts:** `ai.files.upload`, `ai.files.get` polling, `ai.models.countTokens`, `fileData`
+
+---
+
+### 05 Class Schedule Parser
+
+![05 card](cards/05-card.png)
+
+Paste messy timetable text copied from your student portal and get back clean structured JSON. The schema captures unit code, type (lecture/tutorial/lab/workshop), day, start/end time, location, and week pattern. Results render as a colour-coded visual timetable grid alongside the raw JSON.
+
+**Key concepts:** `responseMimeType: 'application/json'`, `responseSchema`, `Type.OBJECT`
+
+---
+
+### 06 Timetable Clash Resolver
+
+![06 card](cards/06-card.png)
+
+Pre-filled with four units (COMP1010, MATH1001, ECON1010, HIST1205), multiple time slot options, and real constraints (Thursday café shift, 40-min bus commute, fortnightly commitment). The AI's step-by-step reasoning appears in a collapsible panel, with the final clash-free timetable below.
+
+**Key concepts:** `thinkingConfig`, `includeThoughts: true`, `thinkingBudget`, thought vs answer parts
+
+---
+
+### 07 Handwritten Timetable Digitiser
+
+![07 card](cards/07-card.png)
+
+Upload a photo of a handwritten or printed timetable — whiteboard, paper planner, sticky note — and extract it as a structured day-by-day schedule. Uses two Gemini calls: one for a readable text summary, a second with a JSON schema for structured output.
+
+**Key concepts:** `inlineData` (base64 image), multimodal `parts`, two-pass structured extraction
+
+---
+
+### 08 Campus Map & Room Finder
+
+![08 card](cards/08-card.png)
+
+Upload a campus map or building floor plan and ask spatial questions — find a lecture theatre, get directions between buildings, identify what floor student services is on. Side-by-side image + answer layout.
+
+**Key concepts:** `inlineData` image understanding, multimodal prompts, `en-AU` locale
+
+---
+
+### 09 Lecture Recording Summariser
+
+![09 card](cards/09-card.png)
+
+Upload a lecture recording (MP4/WebM) or paste a YouTube URL. Get a timestamped topic summary, key concepts and definitions, any assessment hints or deadlines mentioned by the lecturer, and a 5-minute study guide.
+
+**Key concepts:** `ai.files.upload` (video), Files API polling, `fileData` URI, YouTube URL passthrough
+
+---
+
+### 10 Lecture Audio Transcriber
+
+![10 card](cards/10-card.png)
+
+Upload lecture audio (MP3, WAV, M4A) to get a full transcript or summary. A second Gemini call extracts all mentioned deadlines and assessment details as structured JSON, displayed as colour-coded deadline cards in a sidebar.
+
+**Key concepts:** `inlineData` audio (base64), `responseMimeType: 'application/json'` for deadline extraction
+
+---
+
+### 11 Smart Timetable Assistant
+
+![11 card](cards/11-card.png)
+
+Chat interface on the left, live weekly timetable grid on the right. The AI calls five timetable functions (`add_class`, `remove_class`, `list_classes`, `check_clashes`, `get_free_periods`) to manage the schedule through natural language. The function-calling loop is fully shown.
+
+**Key concepts:** `functionDeclarations`, `tools` config, multi-turn function call → result → response loop
+
+---
+
+### 12 Course Info Lookup
+
+![12 card](cards/12-card.png)
+
+Ask real-time questions about Australian uni courses — prerequisites, semester dates, WAM requirements for honours, special consideration policies. Answers are grounded in live Google Search results with source citations and search query chips.
+
+**Key concepts:** `tools: [{ googleSearch: {} }]`, `groundingMetadata`, `groundingChunks`, `webSearchQueries`
+
+---
+
+### 13 Study Load & WAM Calculator
+
+![13 card](cards/13-card.png)
+
+Describe your marks and units, and Gemini generates and runs Python code to calculate WAM impact, the grade needed to pass or hit an HD, weekly study load, and swotvac revision allocation. The generated code and execution output are shown separately.
+
+**Key concepts:** `tools: [{ codeExecution: {} }]`, `executableCode`, `codeExecutionResult`, part parsing
+
+---
+
+### 14 Course Page Analyser
+
+![14 card](cards/14-card.png)
+
+Paste one or two Australian university handbook URLs (ANU, UniMelb, UNSW, UQ, Monash…) and extract prerequisites, assessment weightings, contact hours, and semester details. Two modes: single-unit summary or side-by-side unit comparison.
+
+**Key concepts:** `tools: [{ urlContext: {} }]`, `urlContextMetadata`, markdown rendering with `marked.js`
+
+---
+
+## Quick Start
 
 ```bash
-# Option 1: Open the main index
+git clone https://github.com/joshuacrowley/gemini-html-timetable.git
+cd gemini-html-timetable
 open index.html
-
-# Option 2: Open a specific demo
-open 01-text-generation.html
 ```
 
-Or drag and drop any `.html` file into your browser window.
+Or just drag any `.html` file into your browser.
 
-### API Key Setup
+1. Get a free API key from [Google AI Studio](https://aistudio.google.com/api-keys)
+2. Open a demo file in your browser
+3. Enter your API key when prompted — it's saved in `localStorage`, so you only need to do this once per demo
 
-Each demo will prompt for your Google AI API key on first use. It is stored in your browser's `localStorage` and persists across sessions — you only need to enter it once per demo.
+## Technical Notes
 
-**Privacy note:** Your API key is stored locally and is never sent anywhere except Google's API endpoints.
-
-## Important Notes
-
-- **Demo 2 (Image Generation)** requires a **paid API token** (uses the Imagen API)
-- All other demos work with the free tier
-- No server or build process is required — every file is standalone
-- API keys are stored in `localStorage`
-
-## Technical Details
-
-- Pure HTML/CSS/JavaScript — no frameworks required
-- Uses the `@google/generative-ai` SDK via CDN
-- Responsive design works on desktop and mobile
+- Pure HTML/CSS/JavaScript — no frameworks, no bundler
+- Uses `@google/genai` (latest) via `esm.sh` CDN
+- Each file is fully self-contained
+- Responsive — works on desktop and mobile
 - All demos include error handling and loading states
+- **Demo 02** requires a paid Imagen API plan; all others work on the free tier
+
+## Regenerating Card Images
+
+The `cards/` folder contains @2x PNG preview images for each demo, generated with Puppeteer:
+
+```bash
+npm install
+node generate-cards.js
+```
 
 ## Resources
 
-- **Get API Key:** https://aistudio.google.com/api-keys
-- **Gemini API Docs:** https://ai.google.dev/gemini-api/docs
-- **API Reference:** https://ai.google.dev/api
-
-## Contributing
-
-These demos are designed as educational starting points. Feel free to:
-- Use them as templates for your own timetable app
-- Modify and extend each demo
-- Share them with others learning about AI-powered scheduling
+- [Get API Key](https://aistudio.google.com/api-keys)
+- [Gemini API Docs](https://ai.google.dev/gemini-api/docs)
+- [API Reference](https://ai.google.dev/api)
+- [@google/genai SDK](https://www.npmjs.com/package/@google/genai)
 
 ## License
 
 Provided as-is for educational purposes.
-
----
-
-**Build your smart timetable with Gemini.**
