@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookbook Analyst</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8E44AD 0%, #9B59B6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #8E44AD;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #8E44AD;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #saveApiKey:hover {
+            background: #9B59B6;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #8E44AD;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .upload-section {
+            border: 2px dashed #e1e1e1;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: border-color 0.3s ease;
+        }
+
+        .upload-section.dragover {
+            border-color: #8E44AD;
+            background: #f8f4ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #8E44AD;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            padding: 12px 24px;
+            background: #8E44AD;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #9B59B6;
+        }
+
+        .file-info {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .control-group select,
+        .control-group textarea {
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .control-group select:focus,
+        .control-group textarea:focus {
+            outline: none;
+            border-color: #8E44AD;
+        }
+
+        .query-section {
+            margin-bottom: 30px;
+        }
+
+        #queryInput {
+            width: 100%;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 15px;
+            background: #8E44AD;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .process-btn:hover {
+            background: #9B59B6;
+        }
+
+        .process-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .output-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 300px;
+        }
+
+        .output-content {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .recipe-table {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e1e1e1;
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: #8E44AD;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+            gap: 10px;
+        }
+
+        .recipe-row {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+            gap: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .recipe-row:hover {
+            background: #f8f9fa;
+        }
+
+        .recipe-row:last-child {
+            border-bottom: none;
+        }
+
+        .recipe-name {
+            font-weight: bold;
+            color: #8E44AD;
+        }
+
+        .page-number {
+            background: #e8f5e8;
+            color: #2d5016;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .recipe-details {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            padding: 15px;
+            border-top: 1px solid #e1e1e1;
+            display: none;
+        }
+
+        .recipe-details.expanded {
+            display: block;
+        }
+
+        .detail-section {
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #8E44AD;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-key-group {
+                flex-direction: column;
+            }
+            
+            #saveApiKey {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Cookbook Analyst</h1>
+            <p>Process long cookbook chapters to extract specific recipes</p>
+        </div>
+        
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start processing cookbooks</div>
+        </div>
+        
+        <div class="content-section">
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">📄</div>
+                <h3>Load Cookbook PDF</h3>
+                <p>Enter a PDF URL or upload a file</p>
+                <div style="margin-bottom: 20px;">
+                    <input type="url" id="pdfUrl" placeholder="https://example.com/cookbook.pdf" 
+                           value="https://joshuacrowley.com/pdfs/Betty%20Crockers%20International%20cookbook.pdf"
+                           style="width: 100%; padding: 12px; border: 2px solid #e1e1e1; border-radius: 8px; font-size: 1rem; margin-bottom: 10px;">
+                    <button class="upload-btn" onclick="loadPdfFromUrl()">Load PDF from URL</button>
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        💡 Betty Crocker's International Cookbook loaded by default
+                    </div>
+                </div>
+                <div style="text-align: center; margin: 20px 0; color: #666;">— OR —</div>
+                <input type="file" id="fileInput" class="file-input" accept=".pdf,.txt,.doc,.docx">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Upload Local File</button>
+                <div class="file-info" id="fileInfo">
+                    <strong>File loaded:</strong> <span id="fileName"></span><br>
+                    <strong>Size:</strong> <span id="fileSize"></span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="modelSelect">Gemini Model</label>
+                    <select id="modelSelect">
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro (Best analysis)</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Balanced)</option>
+                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (Fast)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="taskSelect">Processing Task</label>
+                    <select id="taskSelect">
+                        <option value="Extract and list">Extract and list</option>
+                        <option value="Summarize">Summarize</option>
+                        <option value="Categorize">Categorize</option>
+                        <option value="Find patterns">Find patterns</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="focusArea">Focus Area</label>
+                    <select id="focusArea">
+                        <option value="desserts">Desserts</option>
+                        <option value="appetizers">Appetizers</option>
+                        <option value="main courses">Main Courses</option>
+                        <option value="all recipes">All Recipes</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="query-section">
+                <div class="control-group">
+                    <label for="queryInput">Analysis Query</label>
+                    <textarea id="queryInput" placeholder="Find and list all dessert recipes in this cookbook. For each dessert, provide: name, main sweet ingredient, cooking time, difficulty level, and page number.">Find and list all dessert recipes in this cookbook. For each dessert, provide: name, main sweet ingredient, cooking time, difficulty level, and page number for easy reference.</textarea>
+                </div>
+            </div>
+            
+            <button class="process-btn" id="processBtn">Process Cookbook</button>
+            
+            <div class="output-section">
+                <div class="output-content" id="outputContent">
+                    Upload a cookbook chapter and click "Process Cookbook" to analyze it...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let uploadedFile = null;
+        let loadedFromUrl = false;
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const uploadSection = document.getElementById('uploadSection');
+        const pdfUrl = document.getElementById('pdfUrl');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const modelSelect = document.getElementById('modelSelect');
+        const taskSelect = document.getElementById('taskSelect');
+        const focusArea = document.getElementById('focusArea');
+        const queryInput = document.getElementById('queryInput');
+        const processBtn = document.getElementById('processBtn');
+        const outputContent = document.getElementById('outputContent');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                updateProcessButton();
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                processBtn.disabled = true;
+            }
+        }
+
+        function updateProcessButton() {
+            processBtn.disabled = !(ai && (uploadedFile || loadedFromUrl));
+        }
+
+        // Load PDF from URL
+        window.loadPdfFromUrl = async () => {
+            const url = pdfUrl.value.trim();
+            if (!url) {
+                alert('Please enter a PDF URL');
+                return;
+            }
+
+            if (!ai) {
+                alert('Please enter your API key first');
+                return;
+            }
+
+            try {
+                fileName.textContent = 'Loading PDF from URL...';
+                fileInfo.style.display = 'block';
+
+                // Fetch PDF and upload to Gemini Files API
+                const pdfBuffer = await fetch(url).then(response => response.arrayBuffer());
+                const fileBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+
+                uploadedFile = await ai.files.upload({
+                    file: fileBlob,
+                    config: {
+                        displayName: 'Betty Crocker International Cookbook',
+                        mimeType: 'application/pdf'
+                    },
+                });
+
+                // Wait for processing
+                let getFile = await ai.files.get({ name: uploadedFile.name });
+                while (getFile.state === 'PROCESSING') {
+                    fileName.textContent = `Processing PDF... (${getFile.state})`;
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    getFile = await ai.files.get({ name: uploadedFile.name });
+                }
+
+                if (getFile.state === 'FAILED') {
+                    throw new Error('PDF processing failed');
+                }
+
+                loadedFromUrl = true;
+                fileName.textContent = 'Betty Crocker International Cookbook (from URL)';
+                fileSize.textContent = `${Math.round(pdfBuffer.byteLength / 1024)} KB`;
+                updateProcessButton();
+
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                fileName.textContent = 'Error loading PDF from URL';
+                loadedFromUrl = false;
+                updateProcessButton();
+            }
+        };
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        // File upload handling
+        fileInput.addEventListener('change', handleFileUpload);
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            uploadedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'block';
+            updateProcessButton();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Process cookbook
+        processBtn.addEventListener('click', async () => {
+            if (!ai || !uploadedFile) {
+                alert('Please enter your API key and upload a file first');
+                return;
+            }
+
+            const query = queryInput.value.trim();
+            if (!query) {
+                alert('Please enter an analysis query');
+                return;
+            }
+
+            processBtn.disabled = true;
+            outputContent.innerHTML = '<div class="loading">📚 Analyzing cookbook chapter...</div>';
+
+            try {
+                if (loadedFromUrl) {
+                    // Use Files API for URL-loaded PDF
+                    await processWithFilesAPI(query);
+                } else {
+                    // Use inline content for uploaded files
+                    const fileContent = await readFileContent(uploadedFile);
+                    await processWithInlineContent(query, fileContent);
+                }
+
+            } catch (error) {
+                console.error('Error processing cookbook:', error);
+                outputContent.innerHTML = '<div class="loading">❌ Error processing cookbook. Please try again.</div>';
+            }
+
+            processBtn.disabled = false;
+        });
+
+        async function processWithFilesAPI(query) {
+            const selectedModel = modelSelect.value;
+            
+            // Use structured output for better table display
+            const response = await ai.models.generateContent({
+                model: selectedModel,
+                contents: [
+                    { text: query },
+                    { fileData: { mimeType: uploadedFile.mimeType, fileUri: uploadedFile.uri } }
+                ],
+                config: {
+                    maxOutputTokens: selectedModel === 'gemini-2.5-pro' ? 8192 : 4096, // Increased for large JSON responses
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                recipeName: { type: Type.STRING },
+                                mainIngredient: { type: Type.STRING },
+                                cookingTime: { type: Type.STRING },
+                                difficulty: { type: Type.STRING },
+                                pageNumber: { type: Type.STRING },
+                                description: { type: Type.STRING }
+                            },
+                            propertyOrdering: ["recipeName", "mainIngredient", "cookingTime", "difficulty", "pageNumber", "description"]
+                        }
+                    }
+                },
+            });
+
+            if (!response || !response.text) {
+                throw new Error('No response received from API');
+            }
+
+            // Parse structured JSON response (should be clean JSON with structured output)
+            try {
+                const recipes = JSON.parse(response.text);
+                displayRecipesTable(recipes);
+            } catch (parseError) {
+                console.error('JSON parsing error:', parseError);
+                console.log('Response text:', response.text);
+                
+                // Handle truncated JSON (common with large responses)
+                let jsonText = response.text;
+                
+                // Try to fix truncated JSON by completing the structure
+                if (jsonText.includes('"recipeName"') && !jsonText.trim().endsWith(']')) {
+                    // Find the last complete recipe object
+                    const lastCompleteIndex = jsonText.lastIndexOf('},');
+                    if (lastCompleteIndex > 0) {
+                        jsonText = jsonText.substring(0, lastCompleteIndex + 1) + '\n]';
+                    }
+                }
+                
+                try {
+                    const recipes = JSON.parse(jsonText);
+                    displayRecipesTable(recipes);
+                    
+                    // Show warning about truncation
+                    const warning = document.createElement('div');
+                    warning.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 8px; margin-top: 10px; color: #856404;';
+                    warning.innerHTML = '⚠️ Response was truncated due to token limit. Some recipes may be missing. Try using Gemini 2.5 Pro for longer responses.';
+                    outputContent.appendChild(warning);
+                } catch (secondError) {
+                    throw new Error(`JSON parsing failed: ${parseError.message}`);
+                }
+            }
+        }
+
+        async function processWithInlineContent(query, fileContent) {
+            const selectedModel = modelSelect.value;
+            
+            const response = await ai.models.generateContent({
+                model: selectedModel,
+                contents: [{
+                    text: `${query}\n\nDocument content:\n${fileContent.substring(0, 100000)}`
+                }],
+                generationConfig: {
+                    maxOutputTokens: selectedModel === 'gemini-2.5-pro' ? 4096 : 2048,
+                },
+            });
+
+            if (!response || !response.text) {
+                throw new Error('No response received from API');
+            }
+
+            displayResponse(response.text);
+        }
+
+        function displayResponse(responseText) {
+            // Format the response as recipe items if it looks like a list
+            if (responseText.includes('1.') || responseText.includes('•')) {
+                const recipes = parseRecipeList(responseText);
+                displayRecipes(recipes);
+            } else {
+                outputContent.textContent = responseText;
+            }
+        }
+
+        function displayRecipesTable(recipes) {
+            if (!recipes || recipes.length === 0) {
+                outputContent.innerHTML = '<div class="loading">No recipes found matching your criteria.</div>';
+                return;
+            }
+
+            const tableHTML = `
+                <div class="recipe-table">
+                    <div class="table-header">
+                        <div>Recipe Name</div>
+                        <div>Main Ingredient</div>
+                        <div>Cooking Time</div>
+                        <div>Difficulty</div>
+                        <div>Page</div>
+                    </div>
+                    ${recipes.map((recipe, index) => `
+                        <div class="recipe-row" onclick="toggleDetails(${index})">
+                            <div class="recipe-name">${recipe.recipeName || 'Unknown Recipe'}</div>
+                            <div>${recipe.mainIngredient || 'N/A'}</div>
+                            <div>${recipe.cookingTime || 'N/A'}</div>
+                            <div>${recipe.difficulty || 'N/A'}</div>
+                            <div class="page-number">${recipe.pageNumber || '?'}</div>
+                        </div>
+                        <div class="recipe-details" id="details-${index}">
+                            <div class="detail-section">
+                                <div class="detail-label">Full Description:</div>
+                                <div>${recipe.description || 'No additional details available'}</div>
+                            </div>
+                            <div class="detail-section">
+                                <div class="detail-label">Reference:</div>
+                                <div>Page ${recipe.pageNumber || '?'} in Betty Crocker's International Cookbook</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 8px; font-size: 0.9rem;">
+                    <strong>📊 Found ${recipes.length} recipes</strong> - Click any row to see more details
+                </div>
+            `;
+
+            outputContent.innerHTML = tableHTML;
+        }
+
+        // Toggle recipe details
+        window.toggleDetails = (index) => {
+            const details = document.getElementById(`details-${index}`);
+            const isExpanded = details.classList.contains('expanded');
+            
+            // Close all other details
+            document.querySelectorAll('.recipe-details').forEach(el => {
+                el.classList.remove('expanded');
+            });
+            
+            // Toggle current details
+            if (!isExpanded) {
+                details.classList.add('expanded');
+            }
+        };
+
+        async function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // For demo purposes, we'll simulate content
+                    // In reality, you'd need PDF parsing for actual PDFs
+                    const sampleContent = `
+Sample Cookbook Chapter - Desserts
+
+1. Chocolate Lava Cake
+Main ingredient: Dark chocolate
+Cooking time: 25 minutes
+Difficulty: Medium
+A rich, molten chocolate dessert perfect for special occasions.
+
+2. Vanilla Panna Cotta
+Main ingredient: Heavy cream
+Cooking time: 4 hours (including chilling)
+Difficulty: Easy
+A silky smooth Italian dessert with delicate vanilla flavor.
+
+3. Apple Tarte Tatin
+Main ingredient: Granny Smith apples
+Cooking time: 45 minutes
+Difficulty: Hard
+An upside-down French apple tart with caramelized apples.
+
+4. Lemon Bars
+Main ingredient: Fresh lemons
+Cooking time: 35 minutes
+Difficulty: Easy
+Tangy lemon custard on a buttery shortbread crust.
+
+5. Tiramisu
+Main ingredient: Mascarpone cheese
+Cooking time: 6 hours (including chilling)
+Difficulty: Medium
+Classic Italian coffee-flavored dessert with layers of flavor.
+                    `;
+                    resolve(sampleContent);
+                };
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        function parseRecipeList(text) {
+            const recipes = [];
+            const lines = text.split('\n');
+            let currentRecipe = null;
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.match(/^\d+\.|^•/)) {
+                    if (currentRecipe) recipes.push(currentRecipe);
+                    currentRecipe = { name: trimmed, details: [] };
+                } else if (currentRecipe && trimmed) {
+                    currentRecipe.details.push(trimmed);
+                }
+            }
+            if (currentRecipe) recipes.push(currentRecipe);
+
+            return recipes;
+        }
+
+        function displayRecipes(recipes) {
+            if (recipes.length === 0) {
+                outputContent.textContent = 'No recipes found matching your criteria.';
+                return;
+            }
+
+            outputContent.innerHTML = recipes.map(recipe => `
+                <div class="recipe-item">
+                    <div class="recipe-name">${recipe.name}</div>
+                    <div>${recipe.details.join('<br>')}</div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        updateProcessButton();
+    </script>
+</body>
+</html>

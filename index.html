@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini API Cooking Demos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .content-section {
+            padding: 40px;
+        }
+
+        .intro-text {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .demos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .demo-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            border: 1px solid #e1e1e1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-color);
+        }
+
+        .demo-card.text-gen { --accent-color: #FF6B6B; }
+        .demo-card.image-gen { --accent-color: #4ECDC4; }
+        .demo-card.speech-gen { --accent-color: #FFA726; }
+        .demo-card.long-context { --accent-color: #8E44AD; }
+        .demo-card.structured { --accent-color: #2ECC71; }
+        .demo-card.thinking { --accent-color: #E74C3C; }
+        .demo-card.document { --accent-color: #3498DB; }
+        .demo-card.image-understanding { --accent-color: #16A085; }
+        .demo-card.video { --accent-color: #D63031; }
+        .demo-card.audio { --accent-color: #6C5CE7; }
+        .demo-card.function { --accent-color: #00B894; }
+        .demo-card.search { --accent-color: #E17055; }
+        .demo-card.code { --accent-color: #74B9FF; }
+        .demo-card.url { --accent-color: #FD79A8; }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .demo-icon {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-info {
+            flex: 1;
+        }
+
+        .demo-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-number {
+            background: var(--accent-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .demo-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .demo-description {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .demo-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .feature-tag {
+            background: #e8f5e8;
+            color: #2d5016;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .demo-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .demo-link:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            border-top: 1px solid #e1e1e1;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .footer p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .quick-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-link {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        .quick-link:hover {
+            background: #e8f5e8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .demos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-section {
+                padding: 20px;
+            }
+
+            .quick-links {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍳 Gemini API Cooking Demos</h1>
+            <p>Explore the power of Google's Gemini API through interactive cooking-themed prototypes. Each demo showcases different AI capabilities with delicious examples.</p>
+        </div>
+        
+        <div class="content-section">
+            <div class="intro-text">
+                <p>Welcome to the Gemini API Cookbook! 🧑‍🍳 These interactive prototypes demonstrate various AI capabilities through cooking-themed tasks. Click on any demo below to explore how Gemini can transform your culinary adventures.</p>
+            </div>
+
+            <div class="demos-grid">
+                <div class="demo-card text-gen">
+                    <div class="demo-header">
+                        <div class="demo-icon">📝</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">1</span>
+                                Recipe Writing Assistant
+                            </div>
+                            <div class="demo-subtitle">Text Generation</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Create imaginative and sophisticated recipes with AI. Generate gourmet "Invisible Soup" recipes with adjustable creativity levels.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Temperature Control</span>
+                        <span class="feature-tag">System Instructions</span>
+                        <span class="feature-tag">Creative Writing</span>
+                    </div>
+                    <a href="01-text-generation.html" class="demo-link">
+                        Start Cooking 🍳
+                    </a>
+                </div>
+
+                <div class="demo-card image-gen">
+                    <div class="demo-header">
+                        <div class="demo-icon">🍽️</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">2</span>
+                                AI Food Plating Assistant
+                            </div>
+                            <div class="demo-subtitle">Image Generation</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Transform an empty plate into a beautifully plated dish with AI. See before and after comparisons of your culinary creations.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Food Photography</span>
+                        <span class="feature-tag">Before/After</span>
+                        <span class="feature-tag">Professional Plating</span>
+                    </div>
+                    <a href="02-image-generation.html" class="demo-link">
+                        Plate Dishes 🍽️
+                    </a>
+                </div>
+
+                <div class="demo-card speech-gen">
+                    <div class="demo-header">
+                        <div class="demo-icon">🔊</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">3</span>
+                                Cooking Show Narrator
+                            </div>
+                            <div class="demo-subtitle">Speech Generation</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Create dramatic audio for cooking competitions. Generate professional narrator voices with emphasis and timing.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Voice Styles</span>
+                        <span class="feature-tag">Speech Rate</span>
+                        <span class="feature-tag">Drama Effects</span>
+                    </div>
+                    <a href="03-speech-generation.html" class="demo-link">
+                        Record Audio 🎙️
+                    </a>
+                </div>
+
+                <div class="demo-card long-context">
+                    <div class="demo-header">
+                        <div class="demo-icon">📚</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">4</span>
+                                Cookbook Analyst
+                            </div>
+                            <div class="demo-subtitle">Long Context Processing</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Process long cookbook chapters to extract specific recipes. Analyze 200-page documents for desserts and ingredients.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">PDF Processing</span>
+                        <span class="feature-tag">Recipe Extraction</span>
+                        <span class="feature-tag">Large Documents</span>
+                    </div>
+                    <a href="04-long-context.html" class="demo-link">
+                        Analyze Books 📖
+                    </a>
+                </div>
+
+                <div class="demo-card structured">
+                    <div class="demo-header">
+                        <div class="demo-icon">📊</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">5</span>
+                                Restaurant Menu Database
+                            </div>
+                            <div class="demo-subtitle">Structured Output</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Convert menu descriptions into structured JSON data. Transform text into organized database-ready formats.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">JSON Schema</span>
+                        <span class="feature-tag">Data Validation</span>
+                        <span class="feature-tag">Menu Parsing</span>
+                    </div>
+                    <a href="05-structured-output.html" class="demo-link">
+                        Structure Data 📋
+                    </a>
+                </div>
+
+                <div class="demo-card thinking">
+                    <div class="demo-header">
+                        <div class="demo-icon">🧠</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">6</span>
+                                Kitchen Problem Solver
+                            </div>
+                            <div class="demo-subtitle">Thinking Mode</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Solve complex cooking puzzles with step-by-step reasoning. Watch AI think through cake baking optimization problems.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Step-by-Step</span>
+                        <span class="feature-tag">Math Problems</span>
+                        <span class="feature-tag">Reasoning</span>
+                    </div>
+                    <a href="06-thinking.html" class="demo-link">
+                        Solve Puzzles 🧮
+                    </a>
+                </div>
+
+                <div class="demo-card document">
+                    <div class="demo-header">
+                        <div class="demo-icon">📄</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">7</span>
+                                Recipe Card Digitiser
+                            </div>
+                            <div class="demo-subtitle">Document Processing</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Extract text from handwritten recipe cards. Digitize grandma's cursive writing and margin notes with AI.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Handwriting OCR</span>
+                        <span class="feature-tag">Image Upload</span>
+                        <span class="feature-tag">Text Structure</span>
+                    </div>
+                    <a href="07-document-processing.html" class="demo-link">
+                        Digitize Cards 📝
+                    </a>
+                </div>
+
+                <div class="demo-card image-understanding">
+                    <div class="demo-header">
+                        <div class="demo-icon">🖼️</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">8</span>
+                                Fridge Inspector
+                            </div>
+                            <div class="demo-subtitle">Image Understanding</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Analyze fridge contents and get meal suggestions. AI identifies ingredients and recommends recipes you can make.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Object Detection</span>
+                        <span class="feature-tag">Meal Planning</span>
+                        <span class="feature-tag">Photo Analysis</span>
+                    </div>
+                    <a href="08-image-understanding.html" class="demo-link">
+                        Inspect Fridge 🔍
+                    </a>
+                </div>
+
+                <div class="demo-card video">
+                    <div class="demo-header">
+                        <div class="demo-icon">📹</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">9</span>
+                                Cooking Tutorial Analyser
+                            </div>
+                            <div class="demo-subtitle">Video Understanding</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Extract step-by-step instructions from cooking videos. Generate timestamps and chapter markers automatically.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Video Processing</span>
+                        <span class="feature-tag">Timestamps</span>
+                        <span class="feature-tag">Step Detection</span>
+                    </div>
+                    <a href="09-video-understanding.html" class="demo-link">
+                        Analyze Videos 🎬
+                    </a>
+                </div>
+
+                <div class="demo-card audio">
+                    <div class="demo-header">
+                        <div class="demo-icon">🎤</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">10</span>
+                                Kitchen Timer Interpreter
+                            </div>
+                            <div class="demo-subtitle">Audio Processing</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Transcribe cooking podcasts and extract timing information. Find all cooking durations mentioned in audio.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Audio Transcription</span>
+                        <span class="feature-tag">Time Extraction</span>
+                        <span class="feature-tag">Timeline Creation</span>
+                    </div>
+                    <a href="10-audio.html" class="demo-link">
+                        Process Audio 🎧
+                    </a>
+                </div>
+
+                <div class="demo-card function">
+                    <div class="demo-header">
+                        <div class="demo-icon">🔧</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">11</span>
+                                Smart Kitchen Assistant
+                            </div>
+                            <div class="demo-subtitle">Function Calling</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Control kitchen timers with natural language. Set, adjust, and manage multiple cooking timers through conversation.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Natural Language</span>
+                        <span class="feature-tag">Timer Control</span>
+                        <span class="feature-tag">Function Calls</span>
+                    </div>
+                    <a href="11-function-calling.html" class="demo-link">
+                        Chat Assistant 💬
+                    </a>
+                </div>
+
+                <div class="demo-card search">
+                    <div class="demo-header">
+                        <div class="demo-icon">🔍</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">12</span>
+                                Restaurant Fact Checker
+                            </div>
+                            <div class="demo-subtitle">Google Search Integration</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Verify restaurant claims with real-time search. Check Michelin stars, opening dates, and current pricing information.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Real-time Search</span>
+                        <span class="feature-tag">Fact Verification</span>
+                        <span class="feature-tag">Source Citations</span>
+                    </div>
+                    <a href="12-google-search.html" class="demo-link">
+                        Verify Facts ✅
+                    </a>
+                </div>
+
+                <div class="demo-card code">
+                    <div class="demo-header">
+                        <div class="demo-icon">💻</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">13</span>
+                                Recipe Scaler Calculator
+                            </div>
+                            <div class="demo-subtitle">Code Execution</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Generate and execute code to scale recipe ingredients. Create functions that handle decimal values and proper rounding.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">Code Generation</span>
+                        <span class="feature-tag">Live Execution</span>
+                        <span class="feature-tag">Multiple Languages</span>
+                    </div>
+                    <a href="13-code-execution.html" class="demo-link">
+                        Code Recipes 🧑‍💻
+                    </a>
+                </div>
+
+                <div class="demo-card url">
+                    <div class="demo-header">
+                        <div class="demo-icon">🌐</div>
+                        <div class="demo-info">
+                            <div class="demo-title">
+                                <span class="demo-number">14</span>
+                                Recipe Blog Analyser
+                            </div>
+                            <div class="demo-subtitle">URL Context Processing</div>
+                        </div>
+                    </div>
+                    <div class="demo-description">
+                        Extract and compare recipes from food blog URLs. Analyze baking times, temperatures, and ingredient differences.
+                    </div>
+                    <div class="demo-features">
+                        <span class="feature-tag">URL Processing</span>
+                        <span class="feature-tag">Recipe Extraction</span>
+                        <span class="feature-tag">Comparison Analysis</span>
+                    </div>
+                    <a href="14-url-context.html" class="demo-link">
+                        Analyze Blogs 📰
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <h3>🚀 Getting Started</h3>
+                <p>Each demo requires a Google AI API key to function. You can obtain one from the <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>. Your API key is stored locally in your browser and never sent to any third parties.</p>
+                
+                <div class="quick-links">
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="quick-link">Get API Key</a>
+                    <a href="https://ai.google.dev/gemini-api/docs" target="_blank" class="quick-link">API Documentation</a>
+                    <a href="cooking-themed-tasks.md" class="quick-link">Task Instructions</a>
+                    <a href="gemini-api-code-snippets.md" class="quick-link">Code Examples</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

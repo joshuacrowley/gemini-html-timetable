@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #2ECC71;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #2ECC71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #saveApiKey:hover {
+            background: #27AE60;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #2ECC71;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .schema-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .schema-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .schema-editor {
+            width: 100%;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+
+        .schema-editor:focus {
+            outline: none;
+            border-color: #2ECC71;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .menu-input {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .menu-input:focus {
+            outline: none;
+            border-color: #2ECC71;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: #2ECC71;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .generate-btn:hover {
+            background: #27AE60;
+        }
+
+        .generate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .output-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .output-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 300px;
+        }
+
+        .panel-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2ECC71;
+        }
+
+        .json-output {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .validation-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .validation-status.valid {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .validation-status.invalid {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .output-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-key-group {
+                flex-direction: column;
+            }
+            
+            #saveApiKey {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Restaurant Menu Database</h1>
+            <p>Convert menu descriptions into structured JSON data</p>
+        </div>
+        
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start structuring data</div>
+        </div>
+        
+        <div class="content-section">
+            <div class="schema-section">
+                <div class="schema-title">JSON Schema Definition</div>
+                <textarea class="schema-editor" id="schemaEditor">{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Dish name"
+    },
+    "price": {
+      "type": "number",
+      "description": "Price in dollars"
+    },
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of main ingredients"
+    },
+    "allergens": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of allergens"
+    },
+    "dietary": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dietary classifications"
+    },
+    "prep_time": {
+      "type": "string",
+      "description": "Preparation time"
+    },
+    "calories": {
+      "type": "number",
+      "description": "Calorie count"
+    },
+    "spice_level": {
+      "type": "string",
+      "description": "Spice level"
+    },
+    "serving_size": {
+      "type": "string",
+      "description": "Serving size"
+    }
+  },
+  "required": ["name", "price", "ingredients"]
+}</textarea>
+            </div>
+            
+            <div class="input-section">
+                <div class="input-title">Menu Item Description</div>
+                <textarea class="menu-input" id="menuInput" placeholder='Our signature pasta: "Sunset Spaghetti" - $18.50
+Fresh spaghetti with roasted cherry tomatoes, basil, and garlic.
+Contains gluten and garlic. Vegetarian friendly. 
+Preparation time: 15 minutes. Calories: 420.
+Spice level: Mild. Serving size: 300g.'>Our signature pasta: "Sunset Spaghetti" - $18.50
+Fresh spaghetti with roasted cherry tomatoes, basil, and garlic.
+Contains gluten and garlic. Vegetarian friendly. 
+Preparation time: 15 minutes. Calories: 420.
+Spice level: Mild. Serving size: 300g.</textarea>
+            </div>
+            
+            <button class="generate-btn" id="generateBtn">Generate Structured Data</button>
+            
+            <div class="output-section">
+                <div class="output-panel">
+                    <div class="panel-title">Generated JSON</div>
+                    <div id="jsonOutput" class="json-output">
+                        Click "Generate Structured Data" to see the JSON output...
+                    </div>
+                </div>
+                
+                <div class="output-panel">
+                    <div class="panel-title">Validation & Preview</div>
+                    <div id="validationOutput">
+                        <div class="loading">JSON validation results will appear here...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const schemaEditor = document.getElementById('schemaEditor');
+        const menuInput = document.getElementById('menuInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const validationOutput = document.getElementById('validationOutput');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                generateBtn.disabled = false;
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                generateBtn.disabled = true;
+            }
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        // Generate structured data
+        generateBtn.addEventListener('click', async () => {
+            if (!ai) {
+                alert('Please enter your Google AI API key first');
+                return;
+            }
+
+            const menuText = menuInput.value.trim();
+            const schema = schemaEditor.value.trim();
+
+            if (!menuText) {
+                alert('Please enter a menu item description');
+                return;
+            }
+
+            if (!schema) {
+                alert('Please define a JSON schema');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            jsonOutput.innerHTML = '<div class="loading">📊 Converting to structured data...</div>';
+            validationOutput.innerHTML = '<div class="loading">Validating JSON structure...</div>';
+
+            try {
+                // Parse schema to get the structure
+                const parsedSchema = JSON.parse(schema);
+
+                const response = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: [{
+                        text: `Convert this menu description into JSON format following the provided schema:\n\nMenu description: ${menuText}\n\nSchema: ${schema}\n\nReturn only valid JSON that matches the schema.`
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: convertToGeminiSchema(parsedSchema)
+                    },
+                });
+
+                // Extract JSON from markdown code blocks if present
+                let jsonText = response.text;
+                if (jsonText.includes('```json')) {
+                    const jsonMatch = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
+                    if (jsonMatch) {
+                        jsonText = jsonMatch[1];
+                    }
+                } else if (jsonText.includes('```')) {
+                    const jsonMatch = jsonText.match(/```\s*([\s\S]*?)\s*```/);
+                    if (jsonMatch) {
+                        jsonText = jsonMatch[1];
+                    }
+                }
+
+                const jsonData = JSON.parse(jsonText.trim());
+                
+                // Display formatted JSON
+                jsonOutput.textContent = JSON.stringify(jsonData, null, 2);
+
+                // Validate and display results
+                validateAndDisplayResults(jsonData, parsedSchema);
+
+            } catch (error) {
+                console.error('Error generating structured data:', error);
+                jsonOutput.innerHTML = '<div class="loading">❌ Error generating structured data. Please check your schema and try again.</div>';
+                validationOutput.innerHTML = '<div class="validation-status invalid">❌ Generation failed</div>';
+            }
+
+            generateBtn.disabled = false;
+        });
+
+        function convertToGeminiSchema(jsonSchema) {
+            // Convert JSON Schema to Gemini schema format
+            const convertType = (prop) => {
+                switch (prop.type) {
+                    case 'string': return Type.STRING;
+                    case 'number': return Type.NUMBER;
+                    case 'integer': return Type.INTEGER;
+                    case 'array': return Type.ARRAY;
+                    case 'object': return Type.OBJECT;
+                    default: return Type.STRING;
+                }
+            };
+
+            const properties = {};
+            for (const [key, prop] of Object.entries(jsonSchema.properties)) {
+                if (prop.type === 'array') {
+                    properties[key] = {
+                        type: Type.ARRAY,
+                        items: { type: convertType(prop.items) }
+                    };
+                } else {
+                    properties[key] = {
+                        type: convertType(prop)
+                    };
+                }
+            }
+
+            return {
+                type: Type.OBJECT,
+                properties: properties,
+                required: jsonSchema.required || []
+            };
+        }
+
+        function validateAndDisplayResults(data, schema) {
+            const validation = validateJSON(data, schema);
+            
+            let html = '';
+            
+            if (validation.isValid) {
+                html += '<div class="validation-status valid">✅ JSON is valid and matches schema!</div>';
+            } else {
+                html += '<div class="validation-status invalid">❌ JSON validation failed</div>';
+                html += '<div style="margin-top: 10px; font-size: 0.9rem;">';
+                validation.errors.forEach(error => {
+                    html += `<div style="color: #721c24; margin: 5px 0;">• ${error}</div>`;
+                });
+                html += '</div>';
+            }
+
+            // Add preview
+            html += '<div style="margin-top: 20px;"><strong>Data Preview:</strong></div>';
+            html += '<div style="background: white; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem;">';
+            
+            for (const [key, value] of Object.entries(data)) {
+                html += `<div style="margin: 5px 0;"><strong>${key}:</strong> `;
+                if (Array.isArray(value)) {
+                    html += value.join(', ');
+                } else {
+                    html += value;
+                }
+                html += '</div>';
+            }
+            
+            html += '</div>';
+
+            validationOutput.innerHTML = html;
+        }
+
+        function validateJSON(data, schema) {
+            const errors = [];
+            let isValid = true;
+
+            // Check required fields
+            if (schema.required) {
+                for (const field of schema.required) {
+                    if (!(field in data)) {
+                        errors.push(`Missing required field: ${field}`);
+                        isValid = false;
+                    }
+                }
+            }
+
+            // Check field types
+            for (const [key, value] of Object.entries(data)) {
+                if (schema.properties[key]) {
+                    const expectedType = schema.properties[key].type;
+                    const actualType = Array.isArray(value) ? 'array' : typeof value;
+                    
+                    if (expectedType !== actualType) {
+                        errors.push(`Field '${key}' should be ${expectedType}, got ${actualType}`);
+                        isValid = false;
+                    }
+                }
+            }
+
+            return { isValid, errors };
+        }
+
+        // Initialize
+        generateBtn.disabled = !apiKey;
+    </script>
+</body>
+</html>

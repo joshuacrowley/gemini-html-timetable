@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Kitchen Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #00B894 0%, #00CEC9 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #00B894;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #00B894;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #saveApiKey:hover {
+            background: #00CEC9;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #00B894;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .chat-interface {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            max-height: 350px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: #00B894;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            background: white;
+            color: #333;
+            border: 1px solid #e1e1e1;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            margin: 10px auto;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .function-call {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .function-name {
+            color: #00B894;
+            font-weight: bold;
+        }
+
+        .function-params {
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .chat-input-section {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 20px;
+            font-size: 1rem;
+            resize: none;
+            min-height: 44px;
+            max-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #00B894;
+        }
+
+        .send-btn {
+            padding: 12px 20px;
+            background: #00B894;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            min-width: 80px;
+        }
+
+        .send-btn:hover {
+            background: #00CEC9;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .timer-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e1e1e1;
+        }
+
+        .panel-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00B894;
+        }
+
+        .active-timers {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .timer-item {
+            background: #f8f9fa;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .timer-info {
+            flex: 1;
+        }
+
+        .timer-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .timer-time {
+            color: #00B894;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .timer-btn {
+            padding: 6px 12px;
+            border: 1px solid #00B894;
+            background: white;
+            color: #00B894;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .timer-btn:hover {
+            background: #00B894;
+            color: white;
+        }
+
+        .quick-commands {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .command-title {
+            font-weight: 500;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .command-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .command-item {
+            background: white;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .command-item:hover {
+            background: #ffeaa7;
+        }
+
+        .empty-timers {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .api-key-group {
+                flex-direction: column;
+            }
+            
+            #saveApiKey {
+                width: 100%;
+            }
+
+            .message {
+                max-width: 95%;
+            }
+
+            .chat-input-section {
+                flex-direction: column;
+            }
+
+            .send-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Smart Kitchen Assistant</h1>
+            <p>Control kitchen timers with natural language</p>
+        </div>
+        
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start using the assistant</div>
+        </div>
+        
+        <div class="content-section">
+            <div class="quick-commands">
+                <div class="command-title">🚀 Try these commands:</div>
+                <div class="command-list">
+                    <div class="command-item" onclick="sendCommand('Set a timer for 15 minutes for the pasta')">Set a timer for 15 minutes for the pasta</div>
+                    <div class="command-item" onclick="sendCommand('What timers are currently running?')">What timers are currently running?</div>
+                    <div class="command-item" onclick="sendCommand('Add 5 more minutes to the pasta timer')">Add 5 more minutes to the pasta timer</div>
+                    <div class="command-item" onclick="sendCommand('Set another timer for 8 minutes for the garlic bread')">Set another timer for 8 minutes for the garlic bread</div>
+                </div>
+            </div>
+
+            <div class="chat-interface">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system">Welcome! I can help you manage kitchen timers. Try saying something like "Set a timer for 15 minutes for pasta"</div>
+                </div>
+                
+                <div class="chat-input-section">
+                    <textarea class="chat-input" id="chatInput" placeholder="Type your command here..." rows="1"></textarea>
+                    <button class="send-btn" id="sendBtn">Send</button>
+                </div>
+            </div>
+            
+            <div class="timer-panel">
+                <div class="panel-title">⏰ Active Timers</div>
+                <div class="active-timers" id="activeTimers">
+                    <div class="empty-timers">No active timers. Use the chat above to set some timers!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let timers = [];
+        let timerIdCounter = 1;
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const activeTimers = document.getElementById('activeTimers');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                sendBtn.disabled = false;
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                sendBtn.disabled = true;
+            }
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        // Chat functionality
+        sendBtn.addEventListener('click', () => {
+            const message = chatInput.value.trim();
+            if (message) {
+                sendMessage(message);
+                chatInput.value = '';
+            }
+        });
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const message = chatInput.value.trim();
+                if (message) {
+                    sendMessage(message);
+                    chatInput.value = '';
+                }
+            }
+        });
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+        });
+
+        function sendMessage(message) {
+            if (!ai) {
+                alert('Please enter your Google AI API key first');
+                return;
+            }
+
+            // Add user message
+            addMessage('user', message);
+            
+            // Process command
+            processCommand(message);
+        }
+
+        function addMessage(type, content, functionCall = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            if (functionCall) {
+                messageDiv.innerHTML = `
+                    ${content}
+                    <div class="function-call">
+                        <div class="function-name">🔧 ${functionCall.name}</div>
+                        <div class="function-params">${JSON.stringify(functionCall.params, null, 2)}</div>
+                    </div>
+                `;
+            } else {
+                messageDiv.textContent = content;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function processCommand(command) {
+            try {
+                // Simulate function calling with AI
+                const response = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: [{
+                        text: `You are a kitchen timer assistant. Analyze this command and determine what timer function to call: "${command}". 
+                        
+                        Available functions:
+                        - setTimer(name, minutes): Set a new timer
+                        - listTimers(): Show all active timers  
+                        - addTime(timerName, additionalMinutes): Add time to existing timer
+                        - removeTimer(timerName): Remove a timer
+                        
+                        Respond with the function name and parameters, then a friendly message.`
+                    }],
+                });
+
+                // Parse the AI response and simulate function execution
+                const aiResponse = response.text;
+                const functionCall = extractFunctionCall(command);
+                
+                if (functionCall) {
+                    const result = executeFunction(functionCall);
+                    addMessage('assistant', result.message, {
+                        name: functionCall.name,
+                        params: functionCall.params
+                    });
+                } else {
+                    addMessage('assistant', aiResponse);
+                }
+
+            } catch (error) {
+                console.error('Error processing command:', error);
+                addMessage('assistant', 'Sorry, I had trouble understanding that command. Try something like "Set a timer for 10 minutes for pasta"');
+            }
+        }
+
+        function extractFunctionCall(command) {
+            const lowerCommand = command.toLowerCase();
+            
+            // Set timer pattern
+            const setTimerMatch = lowerCommand.match(/set.*timer.*?(\d+).*?minute.*?for.*?(.+?)(?:\.|$)/);
+            if (setTimerMatch) {
+                return {
+                    name: 'setTimer',
+                    params: {
+                        name: setTimerMatch[2].trim(),
+                        minutes: parseInt(setTimerMatch[1])
+                    }
+                };
+            }
+
+            // List timers pattern
+            if (lowerCommand.includes('what timer') || lowerCommand.includes('show timer') || lowerCommand.includes('list timer')) {
+                return {
+                    name: 'listTimers',
+                    params: {}
+                };
+            }
+
+            // Add time pattern
+            const addTimeMatch = lowerCommand.match(/add.*?(\d+).*?minute.*?to.*?(.+?)(?:\.|$)/);
+            if (addTimeMatch) {
+                return {
+                    name: 'addTime',
+                    params: {
+                        timerName: addTimeMatch[2].trim(),
+                        additionalMinutes: parseInt(addTimeMatch[1])
+                    }
+                };
+            }
+
+            return null;
+        }
+
+        function executeFunction(functionCall) {
+            switch (functionCall.name) {
+                case 'setTimer':
+                    return setTimer(functionCall.params.name, functionCall.params.minutes);
+                case 'listTimers':
+                    return listTimers();
+                case 'addTime':
+                    return addTime(functionCall.params.timerName, functionCall.params.additionalMinutes);
+                case 'removeTimer':
+                    return removeTimer(functionCall.params.timerName);
+                default:
+                    return { message: "I don't recognize that function." };
+            }
+        }
+
+        function setTimer(name, minutes) {
+            const timer = {
+                id: timerIdCounter++,
+                name: name,
+                originalMinutes: minutes,
+                remainingSeconds: minutes * 60,
+                startTime: Date.now()
+            };
+            
+            timers.push(timer);
+            updateTimerDisplay();
+            
+            return {
+                message: `✅ Timer set! "${name}" for ${minutes} minutes.`
+            };
+        }
+
+        function listTimers() {
+            if (timers.length === 0) {
+                return { message: "No active timers right now." };
+            }
+            
+            const timerList = timers.map(timer => {
+                const remainingMinutes = Math.ceil(timer.remainingSeconds / 60);
+                return `• ${timer.name}: ${remainingMinutes} minutes remaining`;
+            }).join('\n');
+            
+            return {
+                message: `Active timers:\n${timerList}`
+            };
+        }
+
+        function addTime(timerName, additionalMinutes) {
+            const timer = timers.find(t => t.name.toLowerCase().includes(timerName.toLowerCase()));
+            
+            if (!timer) {
+                return { message: `❌ Couldn't find a timer for "${timerName}". Try being more specific.` };
+            }
+            
+            timer.remainingSeconds += additionalMinutes * 60;
+            updateTimerDisplay();
+            
+            return {
+                message: `✅ Added ${additionalMinutes} minutes to "${timer.name}" timer.`
+            };
+        }
+
+        function removeTimer(timerName) {
+            const timerIndex = timers.findIndex(t => t.name.toLowerCase().includes(timerName.toLowerCase()));
+            
+            if (timerIndex === -1) {
+                return { message: `❌ Couldn't find a timer for "${timerName}".` };
+            }
+            
+            const removedTimer = timers.splice(timerIndex, 1)[0];
+            updateTimerDisplay();
+            
+            return {
+                message: `✅ Removed "${removedTimer.name}" timer.`
+            };
+        }
+
+        function updateTimerDisplay() {
+            if (timers.length === 0) {
+                activeTimers.innerHTML = '<div class="empty-timers">No active timers. Use the chat above to set some timers!</div>';
+                return;
+            }
+
+            activeTimers.innerHTML = timers.map(timer => {
+                const remainingMinutes = Math.ceil(timer.remainingSeconds / 60);
+                const timeDisplay = remainingMinutes > 1 ? `${remainingMinutes} min` : `${timer.remainingSeconds} sec`;
+                
+                return `
+                    <div class="timer-item">
+                        <div class="timer-info">
+                            <div class="timer-name">${timer.name}</div>
+                            <div class="timer-time">${timeDisplay}</div>
+                        </div>
+                        <div class="timer-controls">
+                            <button class="timer-btn" onclick="pauseTimer(${timer.id})">⏸️</button>
+                            <button class="timer-btn" onclick="removeTimerById(${timer.id})">❌</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Global functions for timer controls
+        window.sendCommand = (command) => {
+            chatInput.value = command;
+            sendMessage(command);
+        };
+
+        window.pauseTimer = (timerId) => {
+            addMessage('system', `Timer ${timerId} paused (simulation)`);
+        };
+
+        window.removeTimerById = (timerId) => {
+            const timerIndex = timers.findIndex(t => t.id === timerId);
+            if (timerIndex !== -1) {
+                const removedTimer = timers.splice(timerIndex, 1)[0];
+                updateTimerDisplay();
+                addMessage('system', `Removed "${removedTimer.name}" timer`);
+            }
+        };
+
+        // Simulate timer countdown (for demo purposes)
+        setInterval(() => {
+            timers.forEach(timer => {
+                if (timer.remainingSeconds > 0) {
+                    timer.remainingSeconds -= 1;
+                }
+            });
+            
+            // Remove expired timers
+            const expiredTimers = timers.filter(t => t.remainingSeconds <= 0);
+            expiredTimers.forEach(timer => {
+                addMessage('system', `⏰ "${timer.name}" timer finished!`);
+            });
+            
+            timers = timers.filter(t => t.remainingSeconds > 0);
+            updateTimerDisplay();
+        }, 1000);
+
+        // Initialize
+        sendBtn.disabled = !apiKey;
+    </script>
+</body>
+</html>

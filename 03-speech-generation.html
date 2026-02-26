@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cooking Show Narrator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FFA726 0%, #FF7043 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #FFA726;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #FFA726;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #saveApiKey:hover {
+            background: #FF7043;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #FFA726;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .control-group input, 
+        .control-group select,
+        .control-group textarea {
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus,
+        .control-group textarea:focus {
+            outline: none;
+            border-color: #FFA726;
+        }
+
+        .text-section {
+            margin-bottom: 30px;
+        }
+
+        #textInput {
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: #FFA726;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .generate-btn:hover {
+            background: #FF7043;
+        }
+
+        .generate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .output-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .audio-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .play-btn:hover {
+            background: #45a049;
+        }
+
+        .pause-btn {
+            background: #ff9800;
+            color: white;
+        }
+
+        .pause-btn:hover {
+            background: #f57c00;
+        }
+
+        .download-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #1976D2;
+        }
+
+        .audio-info {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-key-group {
+                flex-direction: column;
+            }
+            
+            #saveApiKey {
+                width: 100%;
+            }
+
+            .audio-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .audio-btn {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔊 Cooking Show Narrator</h1>
+            <p>Create dramatic audio for cooking competitions</p>
+        </div>
+        
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start creating audio</div>
+        </div>
+        
+        <div class="content-section">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="voiceSelect">Voice Style</label>
+                    <select id="voiceSelect">
+                        <option value="Puck">Puck (Upbeat)</option>
+                        <option value="Kore">Kore (Firm)</option>
+                        <option value="Fenrir">Fenrir (Excitable)</option>
+                        <option value="Charon">Charon (Informative)</option>
+                        <option value="Orus">Orus (Firm)</option>
+                        <option value="Zephyr">Zephyr (Bright)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="speakerMode">Speaker Mode</label>
+                    <select id="speakerMode">
+                        <option value="single">Single Speaker</option>
+                        <option value="multi">Multi-Speaker (Host + Chef)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="speechRate">Speech Rate: <span id="rateValue">0.9</span></label>
+                    <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="0.9">
+                </div>
+            </div>
+            
+            <div class="text-section">
+                <div class="control-group">
+                    <label for="textInput">Script Text</label>
+                    <textarea id="textInput" placeholder="Welcome to Kitchen Chaos! Where five brave chefs battle against time, taste, and temperature! Tonight's secret ingredient will shock you... It's... [dramatic pause] ... BREAKFAST CEREAL! Chefs, you have 30 minutes. Your time starts... NOW!">Host: Welcome to Kitchen Chaos! Where five brave chefs battle against time, taste, and temperature! Tonight's secret ingredient will shock you...
+Chef: It's... [dramatic pause] ... BREAKFAST CEREAL! 
+Host: Chefs, you have 30 minutes. Your time starts... NOW!</textarea>
+                </div>
+            </div>
+            
+            <button class="generate-btn" id="generateBtn">Generate Speech</button>
+            
+            <div class="output-section" id="outputSection">
+                <div class="loading">Your dramatic cooking show narration will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI } from "https://esm.sh/@google/genai@latest";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let currentAudio = null;
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const speakerMode = document.getElementById('speakerMode');
+        const speechRate = document.getElementById('speechRate');
+        const rateValue = document.getElementById('rateValue');
+        const textInput = document.getElementById('textInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const outputSection = document.getElementById('outputSection');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                generateBtn.disabled = false;
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                generateBtn.disabled = true;
+            }
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        // Speech rate slider
+        speechRate.addEventListener('input', (e) => {
+            rateValue.textContent = e.target.value;
+        });
+
+        // Generate speech
+        generateBtn.addEventListener('click', async () => {
+            if (!ai) {
+                alert('Please enter your Google AI API key first');
+                return;
+            }
+
+            const text = textInput.value.trim();
+            if (!text) {
+                alert('Please enter text to convert to speech');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            outputSection.innerHTML = '<div class="loading">🎙️ Generating dramatic narration...</div>';
+
+            try {
+                await generateSpeechWithGemini(text);
+
+            } catch (error) {
+                console.error('Error generating speech:', error);
+                outputSection.innerHTML = `<div class="loading">❌ Error generating speech: ${error.message}</div>`;
+            }
+
+            generateBtn.disabled = false;
+        });
+
+        async function generateSpeechWithGemini(text) {
+            const isMultiSpeaker = speakerMode.value === 'multi';
+            
+            // Prepare the text for multi-speaker if selected
+            let processedText = text;
+            if (isMultiSpeaker) {
+                // Format for TTS multi-speaker (following documentation pattern)
+                if (!text.includes('Host:') && !text.includes('Chef:')) {
+                    // Convert single text to multi-speaker format
+                    processedText = `TTS the following conversation between Host and Chef:\n${text.replace(/Host:/g, 'Host:').replace(/Chef:/g, 'Chef:')}`;
+                } else {
+                    processedText = `TTS the following conversation between Host and Chef:\n${text}`;
+                }
+            }
+
+            const speechConfig = isMultiSpeaker ? {
+                multiSpeakerVoiceConfig: {
+                    speakerVoiceConfigs: [
+                        {
+                            speaker: 'Host',
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: voiceSelect.value }
+                            }
+                        },
+                        {
+                            speaker: 'Chef',
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: 'Puck' }
+                            }
+                        }
+                    ]
+                }
+            } : {
+                voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName: voiceSelect.value }
+                }
+            };
+
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash-preview-tts",
+                contents: [{ text: processedText }],
+                config: {
+                    responseModalities: ['AUDIO'],
+                    speechConfig: speechConfig
+                }
+            });
+
+            // Get the audio data
+            const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+            
+            if (!audioData) {
+                throw new Error('No audio data received from API');
+            }
+
+            // Convert base64 to audio blob and display
+            // The API returns PCM data, we'll create an audio blob that browsers can handle
+            const audioBlob = base64ToBlob(audioData, 'audio/wav');
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            displayGeneratedAudio(audioUrl, processedText, isMultiSpeaker);
+        }
+
+        function base64ToBlob(base64, mimeType) {
+            const byteCharacters = atob(base64);
+            const pcmData = new ArrayBuffer(byteCharacters.length);
+            const pcmView = new Uint8Array(pcmData);
+            
+            for (let i = 0; i < byteCharacters.length; i++) {
+                pcmView[i] = byteCharacters.charCodeAt(i);
+            }
+            
+            // Create proper WAV file with header for better Mac compatibility
+            const wavData = createWavFile(pcmData, 24000, 1, 16); // 24kHz, mono, 16-bit
+            return new Blob([wavData], { type: 'audio/wav' });
+        }
+
+        function createWavFile(pcmData, sampleRate, channels, bitsPerSample) {
+            const length = pcmData.byteLength;
+            const buffer = new ArrayBuffer(44 + length);
+            const view = new DataView(buffer);
+            
+            // WAV file header
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+            
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + length, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, channels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * channels * bitsPerSample / 8, true);
+            view.setUint16(32, channels * bitsPerSample / 8, true);
+            view.setUint16(34, bitsPerSample, true);
+            writeString(36, 'data');
+            view.setUint32(40, length, true);
+            
+            // Copy PCM data
+            const pcmView = new Uint8Array(pcmData);
+            const wavView = new Uint8Array(buffer);
+            wavView.set(pcmView, 44);
+            
+            return buffer;
+        }
+
+        function displayGeneratedAudio(audioUrl, scriptText, isMultiSpeaker) {
+            outputSection.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <h3>🎙️ Speech Generated Successfully!</h3>
+                    <p style="margin: 20px 0; color: #666;">
+                        Mode: <strong>${isMultiSpeaker ? 'Multi-Speaker' : 'Single Speaker'}</strong><br>
+                        Voice: <strong>${voiceSelect.value}</strong><br>
+                        Rate: <strong>${speechRate.value}x</strong>
+                    </p>
+                    <div style="background: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
+                        <strong>Generated Script:</strong><br>
+                        ${scriptText.replace(/\[dramatic pause\]/g, '<em style="color: #FFA726;">[dramatic pause]</em>').replace(/\n/g, '<br>')}
+                    </div>
+                    <audio controls style="width: 100%; margin: 20px 0;">
+                        <source src="${audioUrl}" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div class="audio-controls">
+                        <button class="audio-btn download-btn" onclick="downloadAudio('${audioUrl}')">⬇️ Download Audio</button>
+                    </div>
+                    <div class="audio-info">
+                        ✅ Generated using Gemini 2.5 Flash TTS
+                    </div>
+                </div>
+            `;
+        }
+
+        // Download function
+        window.downloadAudio = (audioUrl) => {
+            const link = document.createElement('a');
+            link.href = audioUrl;
+            link.download = 'cooking-show-narration.wav';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        // Initialize
+        generateBtn.disabled = !apiKey;
+    </script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Timer Interpreter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .api-key-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .api-key-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #apiKeyInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        #apiKeyInput:focus {
+            outline: none;
+            border-color: #6C5CE7;
+        }
+
+        #saveApiKey {
+            padding: 10px 20px;
+            background: #6C5CE7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #saveApiKey:hover {
+            background: #A29BFE;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status.success {
+            color: #6C5CE7;
+        }
+
+        .content-section {
+            padding: 30px;
+        }
+
+        .upload-section {
+            border: 2px dashed #e1e1e1;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: border-color 0.3s ease;
+        }
+
+        .upload-section.dragover {
+            border-color: #6C5CE7;
+            background: #f8f4ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #6C5CE7;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            padding: 12px 24px;
+            background: #6C5CE7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #A29BFE;
+        }
+
+        .audio-preview {
+            max-width: 400px;
+            margin: 15px auto;
+            display: none;
+        }
+
+        .processing-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .option-group select {
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .option-group select:focus {
+            outline: none;
+            border-color: #6C5CE7;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 15px;
+            background: #6C5CE7;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .process-btn:hover {
+            background: #A29BFE;
+        }
+
+        .process-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .output-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .output-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .panel-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #6C5CE7;
+        }
+
+        .transcription {
+            background: white;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        .timing-timeline {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e1e1e1;
+        }
+
+        .timing-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .timing-item:last-child {
+            border-bottom: none;
+        }
+
+        .timing-badge {
+            background: #6C5CE7;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .timing-content {
+            flex: 1;
+        }
+
+        .timing-step {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .timing-context {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .timing-unit {
+            background: #e8f5e8;
+            color: #2d5016;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 10px;
+        }
+
+        .audio-stats {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #6C5CE7;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .processing-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .output-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-key-group {
+                flex-direction: column;
+            }
+            
+            #saveApiKey {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 Kitchen Timer Interpreter</h1>
+            <p>Transcribe and extract cooking timings from audio</p>
+        </div>
+        
+        <div class="api-key-section">
+            <div class="api-key-group">
+                <input type="password" id="apiKeyInput" placeholder="Enter your Google AI API key..." maxlength="100">
+                <button id="saveApiKey">Save Key</button>
+            </div>
+            <div class="api-status" id="apiStatus">Enter your Google AI API key to start processing audio</div>
+        </div>
+        
+        <div class="content-section">
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">🎧</div>
+                <h3>Upload Recipe Audio/Video Clip</h3>
+                <p>Drag and drop an audio or video file here, or click to browse</p>
+                <input type="file" id="fileInput" class="file-input" accept="audio/*,video/*">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose Audio/Video File</button>
+                <audio id="audioPreview" class="audio-preview" controls style="display: none;">
+                    Your browser does not support the audio element.
+                </audio>
+                <video id="videoPreview" class="audio-preview" controls style="display: none;">
+                    Your browser does not support the video element.
+                </video>
+            </div>
+            
+            <div class="processing-options">
+                <div class="option-group">
+                    <label for="extractionMode">Processing Mode</label>
+                    <select id="extractionMode">
+                        <option value="Extract numbers and units">Extract numbers and units</option>
+                        <option value="Full transcription">Full transcription</option>
+                        <option value="Key phrases only">Key phrases only</option>
+                        <option value="Time analysis">Time analysis</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <label for="timingFocus">Timing Focus</label>
+                    <select id="timingFocus">
+                        <option value="Identify cooking timings">Identify cooking timings</option>
+                        <option value="All time mentions">All time mentions</option>
+                        <option value="Preparation times">Preparation times</option>
+                        <option value="Cooking durations">Cooking durations</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="process-btn" id="processBtn">Process Audio</button>
+            
+            <div class="output-section">
+                <div class="output-panel">
+                    <div class="panel-title">📝 Audio Transcription</div>
+                    <div class="audio-stats" id="audioStats">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalTimings">5</div>
+                                <div class="stat-label">Time Mentions</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="audioDuration">2:15</div>
+                                <div class="stat-label">Duration</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="confidence">94%</div>
+                                <div class="stat-label">Confidence</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="transcription" id="transcriptionOutput">
+                        Upload an audio file and click "Process Audio" to see the transcription...
+                    </div>
+                </div>
+                
+                <div class="output-panel">
+                    <div class="panel-title">⏰ Cooking Timeline</div>
+                    <div class="timing-timeline" id="timingTimeline">
+                        <div class="loading">Cooking timings will appear here...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Google GenAI using ESM
+        import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@latest";
+
+        let apiKey = localStorage.getItem('googleAiApiKey') || '';
+        let ai = null;
+        let uploadedAudio = null;
+
+        // Initialize elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const uploadSection = document.getElementById('uploadSection');
+        const fileInput = document.getElementById('fileInput');
+        const audioPreview = document.getElementById('audioPreview');
+        const extractionMode = document.getElementById('extractionMode');
+        const timingFocus = document.getElementById('timingFocus');
+        const processBtn = document.getElementById('processBtn');
+        const audioStats = document.getElementById('audioStats');
+        const totalTimings = document.getElementById('totalTimings');
+        const audioDuration = document.getElementById('audioDuration');
+        const confidence = document.getElementById('confidence');
+        const transcriptionOutput = document.getElementById('transcriptionOutput');
+        const timingTimeline = document.getElementById('timingTimeline');
+
+        // Load saved API key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+            initializeAI();
+        }
+
+        function initializeAI() {
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                apiStatus.textContent = '✅ API key saved and ready!';
+                apiStatus.className = 'api-status success';
+                updateProcessButton();
+            } catch (error) {
+                apiStatus.textContent = '❌ Invalid API key';
+                apiStatus.className = 'api-status';
+                processBtn.disabled = true;
+            }
+        }
+
+        function updateProcessButton() {
+            processBtn.disabled = !(ai && uploadedAudio);
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('googleAiApiKey', apiKey);
+                initializeAI();
+            } else {
+                apiStatus.textContent = 'Please enter a valid API key';
+                apiStatus.className = 'api-status';
+            }
+        });
+
+        // File upload handling
+        fileInput.addEventListener('change', handleFileUpload);
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('audio/') && !file.type.startsWith('video/')) {
+                alert('Please upload an audio or video file');
+                return;
+            }
+
+            uploadedAudio = file;
+            
+            // Show appropriate preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (file.type.startsWith('video/')) {
+                    const videoPreview = document.getElementById('videoPreview');
+                    videoPreview.src = e.target.result;
+                    videoPreview.style.display = 'block';
+                    audioPreview.style.display = 'none';
+                } else {
+                    audioPreview.src = e.target.result;
+                    audioPreview.style.display = 'block';
+                    const videoPreview = document.getElementById('videoPreview');
+                    videoPreview.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(file);
+            
+            updateProcessButton();
+        }
+
+        // Process audio
+        processBtn.addEventListener('click', async () => {
+            if (!ai || !uploadedAudio) {
+                alert('Please enter your API key and upload an audio/video file first');
+                return;
+            }
+
+            processBtn.disabled = true;
+            transcriptionOutput.innerHTML = '<div class="loading">🎧 Uploading and processing audio...</div>';
+            timingTimeline.innerHTML = '<div class="loading">⏰ Extracting cooking timings...</div>';
+
+            try {
+                await processAudioWithGemini();
+
+            } catch (error) {
+                console.error('Error processing audio:', error);
+                transcriptionOutput.innerHTML = '<div class="loading">❌ Error processing audio</div>';
+                timingTimeline.innerHTML = '<div class="loading">❌ Error extracting timings</div>';
+            }
+
+            processBtn.disabled = false;
+        });
+
+        async function processAudioWithGemini() {
+            try {
+                // Check file size (20MB limit for inline data)
+                const maxSize = 20 * 1024 * 1024; // 20MB
+                if (uploadedAudio.size > maxSize) {
+                    throw new Error(`File too large: ${(uploadedAudio.size / (1024 * 1024)).toFixed(1)}MB. Maximum size for inline data is 20MB.`);
+                }
+
+                // Step 1: Convert file to base64 for inline data
+                transcriptionOutput.innerHTML = '<div class="loading">📤 Processing audio file...</div>';
+                
+                const base64AudioFile = await convertFileToBase64(uploadedAudio);
+                console.log('File converted to base64, size:', uploadedAudio.size, 'bytes');
+                console.log('File type:', uploadedAudio.type);
+
+                // Step 2: Generate transcription using inline data
+                transcriptionOutput.innerHTML = '<div class="loading">🎧 Generating transcription...</div>';
+                
+                // Normalize MIME type for better compatibility
+                let mimeType = uploadedAudio.type;
+                if (mimeType === 'video/mp4') {
+                    mimeType = 'video/mp4'; // Keep as video to extract audio
+                } else if (mimeType === 'audio/mp4') {
+                    mimeType = 'audio/mp4';
+                } else if (mimeType === 'audio/mpeg') {
+                    mimeType = 'audio/mp3';
+                }
+                
+                console.log('Using MIME type:', mimeType);
+                
+                const transcriptResponse = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: [
+                        { text: "Please provide a transcript of this audio content. Focus on any cooking instructions, timing mentions, and recipe details." },
+                        {
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: base64AudioFile,
+                            },
+                        },
+                    ]
+                });
+
+                // Step 3: Extract timing information
+                timingTimeline.innerHTML = '<div class="loading">⏰ Extracting cooking timings...</div>';
+                
+                const timingPrompt = `Analyze this transcript and extract all cooking times mentioned. Return a JSON array of timing objects with:
+- time: the time duration mentioned (e.g., "8 minutes", "2 hours")
+- unit: the unit (minutes, hours, seconds)
+- step: what cooking step this timing refers to
+- context: additional context about this timing
+
+Transcript: ${transcriptResponse.text}`;
+
+                const timingResponse = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: [{ text: timingPrompt }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    time: { type: Type.STRING },
+                                    unit: { type: Type.STRING },
+                                    step: { type: Type.STRING },
+                                    context: { type: Type.STRING }
+                                },
+                                required: ["time", "unit", "step", "context"]
+                            }
+                        }
+                    }
+                });
+
+                // Extract JSON from response
+                let jsonText = timingResponse.text;
+                if (jsonText.includes('```json')) {
+                    const jsonMatch = jsonText.match(/```json\s*([\s\S]*?)\s*```/);
+                    if (jsonMatch) {
+                        jsonText = jsonMatch[1];
+                    }
+                }
+
+                const timings = JSON.parse(jsonText.trim());
+
+                // Update stats
+                audioStats.style.display = 'block';
+                totalTimings.textContent = timings.length;
+                audioDuration.textContent = "Processing...";
+                confidence.textContent = "Real API";
+
+                // Display results
+                transcriptionOutput.textContent = transcriptResponse.text;
+                displayTimings(timings);
+
+                console.log('Audio processing completed successfully');
+                
+            } catch (error) {
+                console.error('Detailed error:', error);
+                transcriptionOutput.innerHTML = `<div class="loading">❌ Error: ${error.message}</div>`;
+                timingTimeline.innerHTML = '<div class="loading">❌ Could not extract timings due to error</div>';
+            }
+        }
+
+        async function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // Remove the data URL prefix (e.g., "data:audio/mp3;base64,")
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayTimings(timings) {
+            timingTimeline.innerHTML = timings.map(timing => `
+                <div class="timing-item">
+                    <div class="timing-badge">${timing.time}</div>
+                    <div class="timing-content">
+                        <div class="timing-step">${timing.step}</div>
+                        <div class="timing-context">${timing.context}</div>
+                    </div>
+                    <div class="timing-unit">${timing.unit}</div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        updateProcessButton();
+    </script>
+</body>
+</html>
